@@ -35,7 +35,7 @@
     strTitle db "BSCS 2-2, Group 1",13,10
     strTitle_l equ $-strTitle
 
-    strYear db "[v1.0] | 2024",13,10
+    strYear db "[v2.0] | 2025",13,10
     strYear_l equ $ - strYear
 
     ;main menu choices
