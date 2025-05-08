@@ -15,13 +15,16 @@
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
     started db 0 ; if 1, delay for one second before moving
-    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard
+    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard 3 = challenger
 
     med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
     med_pos1 dw 30,080ch,0b0ch,0c0ch,1204h,1205h,1206h,1207h,1211h,1212h,1213h,1214h,1304h,1305h,1306h,1307h,1311h,1312h,1313h,1314h,1404h,1405h,1406h,1407h,1411h,1412h,1413h,1414h,1a0ch,1b0ch,1e0ch
    
     hard_pos0 dw 60,0302h,0303h,0304h,0305h,0306h,0307h,0402h,0403h,0404h,0405h,0406h,0407h,050fh,060eh,0313h,0314h,0413h,0414h,0e0eh,0e0fh,0e10h,0e11h,0f0eh,0f0fh,0f10h,0f11h,1010h,1011h,1110h,1111h,1507h,1508h,1607h,1608h,1707h,1708h,1709h,170ah,1807h,1808h,1809h,180ah,200ah,2109h,2204h,2205h,2304h,2305h,2211h,2212h,2213h,2214h,2215h,2216h,2311h,2312h,2313h,2314h,2315h,2316h
     hard_pos1 dw 60,0311h,0312h,0411h,0412h,050bh,050ch,050dh,0513h,0514h,060bh,060ch,060dh,0610h,0611h,0613h,0614h,0710h,0711h,0d0bh,0d0ch,0d0dh,100bh,100ch,100dh,1206h,1207h,1211h,1212h,1306h,1307h,1311h,1312h,1406h,1407h,1411h,1412h,160bh,160ch,160dh,190bh,190ch,190dh,1f07h,1f08h,2004h,2005h,2007h,2008h,200bh,200ch,200dh,2104h,2105h,210bh,210ch,210dh,2206h,2207h,2306h,2307h
+
+    challenger_pos0 dw 1, 0305h
+    challenger_pos1 dw 1, 0302h
 
     active_wall_pos dw 61 dup (?)
 
@@ -32,7 +35,7 @@
     strSnek_l equ $-strSnek
 
     ;main menu
-    strTitle db "BSCS 2-2, Group 1",13,10
+    strTitle db "BSCS 2-2, Group 2",13,10
     strTitle_l equ $-strTitle
 
     strYear db "[v2.0] | 2025",13,10
@@ -63,6 +66,9 @@
 
     strHard db "[3] HARD",13,10
     strHard_l equ $ - strHard
+
+    strChallenger db "[4] CHALLENGER",13,10
+    strChallenger_l equ $ - strChallenger
 
     strBack db "[B] BACK",13,10
     strBack_l equ $ - strBack
@@ -250,8 +256,9 @@
   
 .code
     main proc
-    mov ax, 0013h
-    int 10h
+    mov ax, 0013h       ; set video mode 13h | 320x200 pixels | graphics
+    int 10h             ; draw_img procedure writes directly to VGA video memory at 0A000h segment
+                        ; segment (0xA000) is only mapped to video memory when you're in graphics mode like mode 13h
     mov ax, @data
     mov ds, ax 
     mov ax, 0001h
@@ -270,7 +277,7 @@
         jmp top_bot_border
     
     vertical_border:
-        mov ax, 0002h
+        mov ax, 0002h           ; Starting position for left/right border
     left_right_border:
         cmp al, 18h
         je menu_page
@@ -342,6 +349,7 @@
         lea bp, strExit
         call str_out
         ;get resp
+
         menu_page_start:
 
         call resp 
@@ -362,7 +370,9 @@
 
         exit:
             call cls
-            mov ah, 4ch
+            mov ax, 0003h       ; go back to text mode
+            int 10h
+            mov ah, 4Ch
             int 21h 
 
         diff_page:
@@ -374,7 +384,7 @@
             mov es, ax
 
             ;write diff prompt
-            mov dh, 7 ;row
+            mov dh, 5 ;row
             mov dl, 10 ;column
             mov bl, 0Ch ; red
             mov cx, strDiffSelec_l
@@ -382,7 +392,7 @@
             call str_out
 
             ;write diff choices
-            mov dh, 10
+            mov dh, 8
             mov dl, 14
             mov bl, 0Eh ; yellow
                 ;easy
@@ -390,24 +400,30 @@
             lea bp, strEasy
             call str_out
                 ;mod
-            mov dh, 12
+            mov dh, 10
             mov cx, strModerate_l
             lea bp, strModerate
             call str_out
                 ;hard
-            mov dh, 14
+            mov dh, 12
             mov cx, strHard_l
             lea bp, strHard
             call str_out
+                ;challenger
+            mov dh, 14
+            mov cx, strChallenger_l
+            lea bp, strChallenger
+            call str_out
+
                 ;back
             mov dh, 17
             mov cx, strBack_l
             lea bp, strBack
             call str_out
 
-            diff_page_start:
-            ;get resp
-            call resp
+        diff_page_start:
+
+            call resp                       ; get resp, returns ah = bios code | al = ascii code
             cmp al, '1'
                 jnz med
                 mov difficulty, 0
@@ -420,14 +436,22 @@
                 call main_loop
             hard:
             cmp al, '3'
-                jnz mm 
+                jnz challenger
                 mov difficulty, 2
                 call load_walls
                 call main_loop
+            challenger:
+            cmp al, '4'
+                jnz mm
+                mov difficulty, 3
+                call load_walls
+                call main_loop
+
             mm:
             cmp al, 'b'
                 je df_menu
                 jmp diff_page_start
+
                 df_menu: jmp menu_page
         
     load_walls proc
@@ -438,13 +462,12 @@
         int 1ah
         mov ax, dx
         xor dx, dx
-        mov cx, 10
-        div cx
-        xor dx, 01h ;get the least significant bit
+        mov cx, 2
+        div cx  ; BUG FIX: remainder on dx 0 or 1, before it was 0-9
         ;0 or 1 is now stored in dl
         cmp difficulty, 1
         jnz load_hard
-            cmp dl, 1
+            cmp dl, 1 ;cmp the randomizer
             jnz medzero
                 lea si, med_pos1
                 jmp load_active
@@ -452,13 +475,24 @@
                 lea si, med_pos0
                 jmp load_active
         load_hard:
-            cmp dl, 1
+            cmp difficulty, 2
+            jnz load_challenger
+            cmp dl, 1 ;cmp the randomizer
             jnz hardzero
                 lea si, hard_pos1
                 jmp load_active
             hardzero:
                 lea si, hard_pos0
                 jmp load_active
+        load_challenger:
+            cmp dl, 1 ;cmp the randomizer
+            jnz challengerzero
+                lea si, challenger_pos1
+                jmp load_active
+            challengerzero:
+                lea si, challenger_pos0
+                jmp load_active
+
         load_active:
             lea di, active_wall_pos
             mov cx, word ptr [si]
@@ -824,183 +858,183 @@
         jmp menu_page
     game_over_page endp
 
-lead_page:
-    mov ax, @data
-    mov es, ax
-    call cls
+    lead_page:
+        mov ax, @data
+        mov es, ax
+        call cls
 
-    ;write leaderboard prompt
-    mov dh, 6 ;row
-    mov dl, 14 ;column
-    mov bl, 0Ah ;color
-    mov cx, strLeadPage_l
-    lea bp, strLeadPage
-    call str_out
-    
-    mov ax, @data
-    mov ds, ax
-
-    mov ax, 3d02h
-    lea dx, filename
-    int 21h
-    jnc read
-
-    ; create and write to DATA.txt if it does not exist
-    mov ax, 3c00h
-    mov cx, 0
-    lea dx, filename
-    int 21h 
-
-    mov bx, handle
-    lea dx, scores
-    mov ax, 4000h
-    mov cx, 1
-    int 21h
-    jmp back_to_menu
-
-    read:
-    mov handle, ax
-    ;seek to start of file
-    mov ax, 4200h
-    mov bx, handle
-    mov cx, 0
-    mov dx, 0
-    int 21h
-
-    ;read from file
-    mov ah, 3fh
-    mov bx, handle
-    mov cx, 1fh
-    lea dx, scores
-    int 21h
-
-    lea si, scores
-    mov ch, byte ptr [si]
-    cmp ch, 0
-    je back_to_menu
-    ;ch = number of records
-    inc si
-    iter_scores:
-        lea di, strbuf
-        mov cl, 04h
-        ldbuf:
-            mov dl, byte ptr [si]
-            mov byte ptr [di], dl
-            inc di
-            inc si
-            dec cl
-            jnz ldbuf
-
-        mov ah, 02h
-        mov dl, 0ah
-        int 21h 
-
-        push cx
-        mov cx, 16
-        call printsp 
-       
-        pop cx
-        lea dx, strbuf
-        mov ah, 09h
-        int 21h
-
-        mov ah, 02h
-        mov dl, 20h
-        int 21h
-        
-        mov ah, byte ptr [si]
-        inc si
-        mov al, byte ptr [si]
-        push cx
-        mov cx, 03h
-        int_score:         ; convert to decimal (thank u raffy)
-            xor dx, dx
-            mov bx, 0ah
-            div bx
-            push dx
-        loop int_score
-        mov cx, 03h
-        printnum:
-            pop dx
-            add dx, '0'
-            mov ah, 02 
-            int 21h
-        loop printnum
-        inc si
-        pop cx
-        dec ch
-        mov ah, 02h
-        mov dl, 10
-        int 21h
-    jnz iter_scores
-
-        back_to_menu:
-        mov dl, 14
-        mov bl, 0Eh ; yellow
-        mov dh, 19
-        mov cx, strBack_l
-        lea bp, strBack
+        ;write leaderboard prompt
+        mov dh, 6 ;row
+        mov dl, 14 ;column
+        mov bl, 0Ah ;color
+        mov cx, strLeadPage_l
+        lea bp, strLeadPage
         call str_out
 
-        call menu_bg_draw
+        mov ax, @data
+        mov ds, ax
 
-        wait_resp:
-        call resp
-        cmp al, 'b'
-            je lead_back
-            jmp wait_resp
+        mov ax, 3d02h
+        lea dx, filename
+        int 21h
+        jnc read
 
-            lead_back:
-                jmp menu_page    
-        ret
+        ; create and write to DATA.txt if it does not exist
+        mov ax, 3c00h
+        mov cx, 0
+        lea dx, filename
+        int 21h 
 
-    menu_bg_draw PROC
-        ;draw left_1
-        mov dh, 0
-        mov dl, 7
-        call calculate_pos
-        lea si, menu_bg_left_1
-        mov bh, 56
-        mov bl, 144
-        call draw_img
+        mov bx, handle
+        lea dx, scores
+        mov ax, 4000h
+        mov cx, 1
+        int 21h
+        jmp back_to_menu
 
-        ;draw left_2
-        add dh, 7
-        mov dl, 16
-        call calculate_pos
-        lea si, menu_bg_left_2
-        mov bh, 48
-        mov bl, 72
-        call draw_img
+        read:
+        mov handle, ax
+        ;seek to start of file
+        mov ax, 4200h
+        mov bx, handle
+        mov cx, 0
+        mov dx, 0
+        int 21h
 
-        ;draw mid
-        add dh, 6
-        mov dl, 22
-        call calculate_pos
-        lea si, menu_bg_mid
-        mov bh, 104
-        mov bl, 24
-        call draw_img
+        ;read from file
+        mov ah, 3fh
+        mov bx, handle
+        mov cx, 1fh
+        lea dx, scores
+        int 21h
 
-        ;draw right
-        add dh, 13
-        mov dl, 16
-        call calculate_pos
-        lea si, menu_bg_right_2
-        mov bh, 72
-        mov bl, 72
-        call draw_img
-        
-        add dh, 9
-        mov dl, 11
-        call calculate_pos
-        lea si, menu_bg_right_1
-        mov bh, 40
-        mov bl, 112
-        call draw_img
+        lea si, scores
+        mov ch, byte ptr [si]
+        cmp ch, 0
+        je back_to_menu
+        ;ch = number of records
+        inc si
+        iter_scores:
+            lea di, strbuf
+            mov cl, 04h
+            ldbuf:
+                mov dl, byte ptr [si]
+                mov byte ptr [di], dl
+                inc di
+                inc si
+                dec cl
+                jnz ldbuf
 
-        ret
-    menu_bg_draw ENDP
+            mov ah, 02h
+            mov dl, 0ah
+            int 21h
+
+            push cx
+            mov cx, 16
+            call printsp
+
+            pop cx
+            lea dx, strbuf
+            mov ah, 09h
+            int 21h
+
+            mov ah, 02h
+            mov dl, 20h
+            int 21h
+
+            mov ah, byte ptr [si]
+            inc si
+            mov al, byte ptr [si]
+            push cx
+            mov cx, 03h
+            int_score:         ; convert to decimal (thank u raffy)
+                xor dx, dx
+                mov bx, 0ah
+                div bx
+                push dx
+            loop int_score
+            mov cx, 03h
+            printnum:
+                pop dx
+                add dx, '0'
+                mov ah, 02
+                int 21h
+            loop printnum
+            inc si
+            pop cx
+            dec ch
+            mov ah, 02h
+            mov dl, 10
+            int 21h
+            jnz iter_scores
+
+            back_to_menu:
+            mov dl, 14
+            mov bl, 0Eh ; yellow
+            mov dh, 19
+            mov cx, strBack_l
+            lea bp, strBack
+            call str_out
+
+            call menu_bg_draw
+
+            wait_resp:
+            call resp
+            cmp al, 'b'
+                je lead_back
+                jmp wait_resp
+
+                lead_back:
+                    jmp menu_page
+            ret
+
+            menu_bg_draw PROC
+                ;draw left_1
+                mov dh, 0
+                mov dl, 7
+                call calculate_pos
+                lea si, menu_bg_left_1
+                mov bh, 56
+                mov bl, 144
+                call draw_img
+
+                ;draw left_2
+                add dh, 7
+                mov dl, 16
+                call calculate_pos
+                lea si, menu_bg_left_2
+                mov bh, 48
+                mov bl, 72
+                call draw_img
+
+                ;draw mid
+                add dh, 6
+                mov dl, 22
+                call calculate_pos
+                lea si, menu_bg_mid
+                mov bh, 104
+                mov bl, 24
+                call draw_img
+
+                ;draw right
+                add dh, 13
+                mov dl, 16
+                call calculate_pos
+                lea si, menu_bg_right_2
+                mov bh, 72
+                mov bl, 72
+                call draw_img
+
+                add dh, 9
+                mov dl, 11
+                call calculate_pos
+                lea si, menu_bg_right_1
+                mov bh, 40
+                mov bl, 112
+                call draw_img
+
+                ret
+            menu_bg_draw ENDP
 
     mech_page:
         ; ch = page tracker
@@ -1737,9 +1771,11 @@ lead_page:
             dec ch 
             jmp skip2
 
-        mech_move_right_inc: inc ch
+        mech_move_right_inc:
+            inc ch
         
-        skip2: call navigate_mech_page
+        skip2:
+            call navigate_mech_page
         ret
     mech_get_resp endp
 
@@ -1807,26 +1843,30 @@ lead_page:
         ret
     printnl endp
 
-    cls proc ; clears the screen
+    cls proc        ; clears the screen
         mov ah, 07h          ; scroll down function
         mov al, 0            ; number of lines to scroll
-        mov cx, 0
-        mov dx, 9090
-        mov bh, 00h          ; clear entire screen
+        mov cx, 0            ; row 0, col 0
+        mov dx, 184Fh        ; row 24, col 79
+        mov bh, 00h          ; black
         int 10h
         ret
     cls endp
 
-    str_out proc
-        mov ax, 1301h   
-        mov bh, 00h   ;page
+    str_out proc        ; display a string
+    ; args :
+    ;   bl = text attribute (color) | cx = number of characters to print |
+    ;   DH, DL = row, column of where to start writing | ES:BP = pointer to the string to print
+
+        mov ax, 1301h   ; AH=13h (write string), AL=01h (update cursor after writing)
+        mov bh, 00h     ; page
         int 10h
         ret 
     str_out endp
 
+    ; no params
+    ; returns: AH = BIOS Scan code | AL = ASCII character
     resp PROC
-        mov ah, 01h         ;get resp
-        int 16h
         mov ah, 00h         ;read resp 
         int 16h
         ret
@@ -2108,7 +2148,21 @@ lead_page:
             ret
     draw endp
 
-    calculate_pos proc ; args: dx = coordinate | ret: di = coord in vram
+    ; ======== CALCULATE SCREEN OFFSET ========
+    ;   Converts a grid coordinate into a VGA memory offset.
+    ;
+    ; Params:
+    ;   DX = Coordinate (DH = row, DL = column)
+    ;
+    ; Returns:
+    ;   DI = Offset in video memory (for mode 13h / 320x200)
+    ;
+    ; Notes:
+    ;   - Assumes each tile/sprite is 8x8 pixels.
+    ;   - 1 byte per pixel (Mode 13h, 0A000h segment).
+    ;   - Use before drawing to video memory.
+
+    calculate_pos proc
         mov ax, @code
         mov ds, ax
         push dx
@@ -2116,7 +2170,7 @@ lead_page:
             mul dh
             mov di, ax
             mov ax, 8*320
-            mov bx, 0
+            xor bx, bx
             add bl, dl
             mul bx 
             add di, ax
@@ -2124,8 +2178,21 @@ lead_page:
         ret
     calculate_pos endp
 
-    draw_img proc   ; args: si = bitmap addr | bx = sprite dimensions (bh=height, hl=width) ; NOTE: calculate the position of the sprite first
-        mov ax, 0A000h  ; vram segment
+    ; ======== DRAW IMAGE TO SCREEN ========
+    ;   Draws a sprite onto the screen using XOR for pixel effect.
+    ;
+    ; Arguments:
+    ;   SI = Address of bitmap data (sprite)
+    ;   BX = Sprite dimensions → BH = height (rows), BL = width (columns)
+    ;   DI = Destination offset in video memory (must be calculated first)
+    ;
+    ; Notes:
+    ;   - DI (coordinate) must be set using calculate_pos before calling this procedure.
+    ;   - Uses XOR rendering (non-destructive / toggle effect).
+    ;   - Assumes 320x200 VGA mode (segment A000h, 1 byte per pixel).
+
+    draw_img proc
+        mov ax, 0A000h  ; Set ES to VGA video memory segment
         mov es, ax   
         mov cl, bl  
         y_axis:
@@ -2146,12 +2213,26 @@ lead_page:
         ret
     draw_img endp 
 
-    rng proc       ; args : di = addr of variable  |  bp = seed
+    ; ======== RANDOM POSITION GENERATOR ========
+    ;   Generates a new (X,Y) grid coordinate that:
+    ;     - Stays within game bounds
+    ;     - Avoids food, rotten, walls, and the snake body
+    ;
+    ; Params:
+    ;   DI = Address of variable to store result (e.g., food_pos, rotten_pos)
+    ;   BP = Seed value for XOR-based pseudo randomness
+    ;
+    ; Returns:
+    ;   Stores coordinate pair in [DI] as a word: BH = X, BL = Y
+
+    rng proc
         mov ax, @data
         mov ds, ax
+
     randstart:
+        ; -------- Generate Random Y (row) --------
         mov ah, 00h
-        int 1ah 
+        int 1ah     ; ; Get system time → DX = clock ticks
         xor dx, bp
 
         mov ax, dx 
@@ -2162,6 +2243,7 @@ lead_page:
         inc dl 
         mov bl, dl ; y coord
         
+        ; -------- Generate Random X (column) --------
         mov ah, 00h
         int 1ah
         xor dx, bp 
@@ -2231,6 +2313,8 @@ lead_page:
             ret
     rng endp 
 
+    ; ======== MOVE PROCEDURE ========
+
     move proc
         mov ax, @data
         mov ds, ax
@@ -2241,6 +2325,8 @@ lead_page:
         je meddelay
         cmp difficulty, 2
         je harddelay 
+        cmp difficulty, 3
+        je challengerdelay 
         
         easydelay: ; 125000 microsec (1e848h)
             mov cx, 1
@@ -2253,6 +2339,9 @@ lead_page:
         harddelay: ; 75000 microsec (124f8h)
             mov cx, 1
             mov dx, 24f8h
+        challengerdelay: ; 10000 microsec (2710h)
+            mov cx, 1
+            mov dx, 2710h
         calldelay:
             call delay
 
