@@ -1,3 +1,9 @@
 *.exe
 *.map
 *.obj
+
+build.bat
+DATA.TXT
+
+test
+
