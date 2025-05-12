@@ -2560,20 +2560,20 @@ lead_page:
         DB 00h,00h,00h,06h,06h,00h,00h,00h  
         DB 00h,00h,0Ah,00h,00h,02h,00h,00h  
         DB 00h,02h,0Fh,02h,0Ah,02h,02h,00h  
-        DB 00h,0Fh,06h,06h,02h,06h,02h,00h  
-        DB 00h,06h,06h,02h,06h,06h,06h,00h  
-        DB 00h,06h,06h,06h,06h,07h,07h,00h  
-        DB 00h,00h,06h,06h,07h,07h,00h,00h  
+        DB 00h,0Fh,0Ch,0Ch,02h,0Ch,02h,00h  
+        DB 00h,0Ch,0Ch,02h,0Ch,0Ch,0Ch,00h  
+        DB 00h,0Ch,0Ch,0Ch,0Ch,02h,02h,00h  
+        DB 00h,00h,0Ch,0Ch,02h,02h,00h,00h  
         DB 00h,00h,00h,00h,00h,00h,00h,00h  
     super_apple:
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h  
-        DB 00h,00h,0Eh,00h,00h,0Eh,00h,00h  
-        DB 00h,0Eh,0Fh,0Eh,0Eh,0Eh,0Eh,00h  
-        DB 00h,0Fh,0Dh,0Dh,0Eh,0Dh,0Eh,00h  
-        DB 00h,0Dh,0Dh,0Eh,0Dh,0Dh,0Dh,00h  
-        DB 00h,0Dh,0Dh,0Dh,0Dh,05h,05h,00h  
-        DB 00h,00h,0Dh,0Dh,05h,05h,00h,00h  
-        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+        DB 03h,0Bh,00h,04h,04h,00h,0Dh,0Ch  
+        DB 0Bh,00h,0Fh,00h,00h,0Eh,00h,0Dh  
+        DB 00h,0Fh,0Fh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Fh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Fh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 0Bh,00h,0Eh,0Eh,0Eh,0Eh,00h,0Dh  
+        DB 03h,0Bh,00h,00h,00h,00h,0Dh,0Ch  
     wall:
         DB 06h,04h,06h,06h,06h,06h,04h,06h
         DB 04h,04h,06h,06h,06h,06h,04h,04h
