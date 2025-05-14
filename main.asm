@@ -2486,34 +2486,47 @@
 
                 inc ah
                 cmp ah, bh 
-                jng rotten_collision 
+                jng skip_to_rotten 
                 dec ah 
 
                 inc bh
                 cmp ah, bh
-                jnl rotten_collision
+                jnl skip_to_rotten
 
                 inc al
                 cmp al, bl 
-                jng rotten_collision 
+                jng skip_to_rotten 
                 dec al
 
                 inc bl
                 cmp al, bl
-                jnl rotten_collision 
+                jnl skip_to_rotten 
 
-                cmp eat_streak, 5
+                ; if apple eaten
+                jmp apple_eaten
+
+                ; if no apple eaten
+                skip_to_rotten:
+                    jmp rotten_collision
+
+                
+            apple_eaten:
+                cmp eat_streak, 5   ; check if streak full
                 je superapl
-                inc snake_length
+
+                ; normal apple score
                 inc eat_streak
-                jmp rand
-                superapl:
-                    add snake_length, 3
-                    mov eat_streak, 0                    
-                rand: 
-                    lea di, food_pos
-                    mov bp, food_seed
-                    call rng
+                call evaluate_apl_score
+                jmp rand            ; move to food generation
+
+            superapl:
+                mov eat_streak, 0     ; reset streak
+                call evaluate_sapl_score
+
+            rand: 
+                lea di, food_pos
+                mov bp, food_seed
+                call rng
 
             rotten_collision:
                 lea si, snake_pos
@@ -2600,6 +2613,58 @@
         int 15h
         ret
     delay endp   
+
+    ; adds apple score based on diffuculty | params: ds - points to @data segment, 
+    evaluate_apl_score proc
+        cmp difficulty, 0 
+        je easy_score
+        cmp difficulty, 1
+        je med_score
+        cmp difficulty, 2
+        je hard_score
+        cmp difficulty, 3
+        je challenger_score
+
+        easy_score:
+            add snake_length, 1
+            jmp done_apl
+        med_score:
+            add snake_length, 2
+            jmp done_apl
+        hard_score:
+            add snake_length, 3
+            jmp done_apl
+        challenger_score:
+            add snake_length, 4
+        done_apl:
+            ret    
+    evaluate_apl_score endp
+
+    ; adds super apple score based on diffuculty | params: ds - points to @data segment, 
+    evaluate_sapl_score proc
+        cmp difficulty, 0 
+        je easy_super_score
+        cmp difficulty, 1
+        je med_super_score
+        cmp difficulty, 2
+        je hard_super_score
+        cmp difficulty, 3
+        je challenger_super_score
+
+        easy_super_score:
+            add snake_length, 3
+            jmp done_sapl
+        med_super_score:
+            add snake_length, 4
+            jmp done_sapl
+        hard_super_score:
+            add snake_length, 5
+            jmp done_sapl
+        challenger_super_score:
+            add snake_length, 6
+        done_sapl:
+            ret
+    evaluate_sapl_score endp
 
     ; bitmaps
     snake_head_up: 
