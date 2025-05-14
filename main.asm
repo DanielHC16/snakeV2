@@ -2555,7 +2555,25 @@ lead_page:
         DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h  
-        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+        DB 00h,00h,00h,00h,00h,00h,00h,00h
+    fireball:
+	    DB 00h,04h,04h,04h,04h,04h,04h,00h  
+        DB 04h,04h,06h,06h,06h,06h,04h,04h  
+        DB 04h,06h,0Eh,0Eh,0Eh,0Eh,06h,04h  
+        DB 04h,0Eh,0Eh,0Fh,0Fh,0Eh,0Eh,04h  
+        DB 04h,0Eh,0Fh,0Fh,0Fh,0Fh,0Eh,04h  
+        DB 04h,0Eh,0Fh,0Fh,0Fh,0Fh,0Eh,04h  
+        DB 04h,06h,06h,06h,06h,06h,06h,04h  
+        DB 00h,04h,04h,04h,04h,04h,04h,00h
+    eagle:
+        DB 00h,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,00h  
+        DB 00h,08h,0Fh,0Fh,0Fh,0Fh,08h,00h  
+        DB 00h,0Fh,08h,0Fh,0Fh,08h,0Fh,00h  
+        DB 00h,0Eh,00h,0Fh,0Fh,00h,0Eh,00h  
+        DB 00h,0Eh,00h,0Eh,0Eh,00h,0Eh,00h  
+        DB 00h,0Fh,0Fh,0Eh,0Eh,0Fh,0Fh,00h  
+        DB 00h,08h,0Fh,0Fh,0Fh,0Fh,08h,00h  
+        DB 00h,06h,06h,06h,06h,06h,06h,00h
     rotten_apple:
         DB 00h,00h,00h,06h,06h,00h,00h,00h  
         DB 00h,00h,0Ah,00h,00h,02h,00h,00h  
