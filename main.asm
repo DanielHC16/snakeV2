@@ -2322,7 +2322,7 @@
             mov bp, snake_length 
             snake_loop:
                 cmp bp, 0
-                je rngdone
+                jl rngdone          ; changed to if legnth is negative
                 dec bp
                 mov ax, word ptr [si]
                 mov bx, word ptr [di] 
