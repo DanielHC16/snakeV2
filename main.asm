@@ -2578,7 +2578,7 @@
                     mov word ptr [si+bx], 0
 
                     dec snake_length 
-                    call evaluate_rapl      ; reduce score base on difficulty
+                    call evaluate_rapl_score      ; reduce score base on difficulty
 
                     lea di, rotten_pos
                     mov bp, rotten_seed
@@ -2693,7 +2693,7 @@
     evaluate_sapl_score endp
 
     ; subtract score based on diffuculty | params: ds - points to @data segment, 
-    evaluate_rapl proc
+    evaluate_rapl_score proc
         cmp difficulty, 0 
         je easy_rapl
         cmp difficulty, 1
@@ -2721,7 +2721,7 @@
             sub snake_score, 4
         done_rapl:
             ret
-    evaluate_rapl endp
+    evaluate_rapl_score endp
 
     ; bitmaps
     snake_head_up: 
