@@ -2692,6 +2692,7 @@
             ret
     evaluate_sapl_score endp
 
+    ; subtract score based on diffuculty | params: ds - points to @data segment, 
     evaluate_rapl proc
         cmp difficulty, 0 
         je easy_rapl
