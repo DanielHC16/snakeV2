@@ -3,6 +3,7 @@
 .data
     snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
+    snake_score dw 0
     key_pressed db ?
     prev_key db ?
     time_now db 00h
@@ -15,7 +16,7 @@
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
     started db 0 ; if 1, delay for one second before moving
-    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard 3 = challenger
+    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard 3 = challenger 4 = survival
 
     med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
     med_pos1 dw 30,080ch,0b0ch,0c0ch,1204h,1205h,1206h,1207h,1211h,1212h,1213h,1214h,1304h,1305h,1306h,1307h,1311h,1312h,1313h,1314h,1404h,1405h,1406h,1407h,1411h,1412h,1413h,1414h,1a0ch,1b0ch,1e0ch
@@ -80,6 +81,9 @@
 
     strChallenger db "[4] CHALLENGER",13,10
     strChallenger_l equ $ - strChallenger
+
+    strSurvival db "[5] SURVIVAL",13,10
+    strSurvival_l equ $ - strSurvival
 
     strBack db "[B] BACK",13,10
     strBack_l equ $ - strBack
@@ -395,7 +399,7 @@
             mov es, ax
 
             ;write diff prompt
-            mov dh, 5 ;row
+            mov dh, 4 ;row
             mov dl, 10 ;column
             mov bl, 0Ch ; red
             mov cx, strDiffSelec_l
@@ -403,7 +407,7 @@
             call str_out
 
             ;write diff choices
-            mov dh, 8
+            mov dh, 7
             mov dl, 14
             mov bl, 0Eh ; yellow
                 ;easy
@@ -411,23 +415,28 @@
             lea bp, strEasy
             call str_out
                 ;mod
-            mov dh, 10
+            mov dh, 9
             mov cx, strModerate_l
             lea bp, strModerate
             call str_out
                 ;hard
-            mov dh, 12
+            mov dh, 11
             mov cx, strHard_l
             lea bp, strHard
             call str_out
                 ;challenger
-            mov dh, 14
+            mov dh, 13
             mov cx, strChallenger_l
             lea bp, strChallenger
             call str_out
+                ;challenger
+            mov dh, 15
+            mov cx, strSurvival_l
+            lea bp, strSurvival
+            call str_out
 
                 ;back
-            mov dh, 17
+            mov dh, 18
             mov cx, strBack_l
             lea bp, strBack
             call str_out
@@ -540,7 +549,7 @@
         lea bp, strScore_GO
         call str_out
             ;write score int
-            mov ax, snake_length
+            mov ax, snake_score
             mov cx, 03h
             divide_score:         ; convert to decimal
                 xor dx, dx
@@ -739,7 +748,7 @@
             mov ah, 7
             int 21h
             mov byte ptr [si], '$'
-            mov ax, snake_length
+            mov ax, snake_score
             lea si, iscore 
             mov byte ptr [si+1], al
             
@@ -1804,6 +1813,7 @@
         mov byte ptr key_pressed, 'e'
         mov byte ptr prev_key, 'f'
         mov bp, snake_length 
+
         clear_snake:
             cmp bp, 0
             je start
@@ -1812,8 +1822,11 @@
             mov word ptr [si], 0 
             jmp clear_snake
         
-        start: mov snake_length, 0 ; reset score for next game loop
-               mov started, 0
+        start:
+            mov snake_length, 0 ; reset for next game loop
+            mov snake_score, 0
+            mov started, 0
+
         game_loop:
             call header
             call input
@@ -1895,7 +1908,7 @@
         lea bp, strScore ; string in es:bp 
         int 10h
 
-        mov ax, snake_length
+        mov ax, snake_score
         mov cx, 03h
         divide:         ; convert to decimal
             xor dx, dx
@@ -2516,6 +2529,7 @@
 
                 ; normal apple score
                 inc eat_streak
+                add snake_length, 1
                 call evaluate_apl_score
                 jmp rand            ; move to food generation
 
@@ -2563,7 +2577,9 @@
                     shl bx, 1   ; basically bx *= 2
                     mov word ptr [si+bx], 0
 
-                    dec snake_length                    
+                    dec snake_length 
+                    call evaluate_rapl      ; reduce score base on difficulty
+
                     lea di, rotten_pos
                     mov bp, rotten_seed
                     call rng 
@@ -2624,18 +2640,23 @@
         je hard_score
         cmp difficulty, 3
         je challenger_score
+        cmp difficulty, 4
+        je survival_score
 
         easy_score:
-            add snake_length, 1
+            add snake_score, 1
             jmp done_apl
         med_score:
-            add snake_length, 2
+            add snake_score, 2
             jmp done_apl
         hard_score:
-            add snake_length, 3
+            add snake_score, 3
             jmp done_apl
         challenger_score:
-            add snake_length, 4
+            add snake_score, 4
+            jmp done_apl
+        survival_score:
+            add snake_score, 4
         done_apl:
             ret    
     evaluate_apl_score endp
@@ -2650,21 +2671,56 @@
         je hard_super_score
         cmp difficulty, 3
         je challenger_super_score
+        cmp difficulty, 4
+        je survival_super_score
 
         easy_super_score:
-            add snake_length, 3
+            add snake_score, 3
             jmp done_sapl
         med_super_score:
-            add snake_length, 4
+            add snake_score, 4
             jmp done_sapl
         hard_super_score:
-            add snake_length, 5
+            add snake_score, 5
             jmp done_sapl
         challenger_super_score:
-            add snake_length, 6
+            add snake_score, 6
+            jmp done_sapl
+        survival_super_score:
+            add snake_score, 6
         done_sapl:
             ret
     evaluate_sapl_score endp
+
+    evaluate_rapl proc
+        cmp difficulty, 0 
+        je easy_rapl
+        cmp difficulty, 1
+        je med_rapl
+        cmp difficulty, 2
+        je hard_rapl
+        cmp difficulty, 3
+        je challenger_rapl
+        cmp difficulty, 4
+        je survival_rapl
+
+        easy_rapl:
+            sub snake_score, 1
+            jmp done_rapl
+        med_rapl:
+            sub snake_score, 2
+            jmp done_rapl
+        hard_rapl:
+            sub snake_score, 3
+            jmp done_rapl
+        challenger_rapl:
+            sub snake_score, 4
+            jmp done_rapl
+        survival_rapl:
+            sub snake_score, 4
+        done_rapl:
+            ret
+    evaluate_rapl endp
 
     ; bitmaps
     snake_head_up: 
