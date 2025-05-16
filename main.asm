@@ -597,12 +597,6 @@
 
                 call load_walls
                 call main_loop
-            challenger:
-            cmp al, '4'
-                jnz mm
-                mov difficulty, 3
-                call load_walls
-                call main_loop
 
             mm:
             cmp al, 'b'
@@ -1261,33 +1255,7 @@ lead_page:
         ; make sure record count is set to 0
        ;mov byte ptr [scores], 0
        ;jmp back_to_menu
-    
-    iter_scores:
-        lea di, strbuf
-        mov cl, 04h
-        ldbuf:
-            mov dl, byte ptr [si]
-            mov byte ptr [di], dl
-            inc di
-            inc si
-            dec cl
-            jnz ldbuf
 
-
-        mov ax, @data
-        mov ds, ax
-
-        mov ax, 3d02h
-        lea dx, filename
-        int 21h
-        jnc read
-
-        lea si, scores
-        mov ch, byte ptr [si]
-        cmp ch, 0
-        je back_to_menu
-        ;ch = number of records
-        inc si
         iter_scores:
             lea di, strbuf
             mov cl, 04h
@@ -1297,7 +1265,7 @@ lead_page:
                 inc di
                 inc si
                 dec cl
-                jnz ldbuf
+	    jnz ldbuf
 
             mov ah, 02h
             mov dl, 0ah
@@ -1340,7 +1308,7 @@ lead_page:
             mov ah, 02h
             mov dl, 10
             int 21h
-            jnz iter_scores
+        jnz iter_scores
 
             back_to_menu:
             mov dl, 14
