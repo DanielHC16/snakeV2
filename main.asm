@@ -2,6 +2,21 @@
 .stack 100h
 .data
 
+    ;variables for eagle
+    ;---- tim ----
+    eagle_origin_x db 3 
+    eagle_origin_y db 3
+    eagle_coords dw ?
+    eagle_speed_x db 1 ;adjust speed here
+    eagle_speed_y db 1 ;adjust speed here
+    ;---- tim ----
+    fireball_origin_x db 33
+    fireball_origin_y db 19
+    fireball_coords dw ?
+    fireball_speed_x db 1 ;adjust speed here
+    fireball_speed_y db 1 ;adjust speed here
+    ;variables for fireball
+
     snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
     snake_score dw 0
@@ -292,6 +307,7 @@
     screbuf db 00h
     
     scores db 00h, 6*50 dup (0)
+
 
 
 
@@ -586,7 +602,7 @@
 
             challenger:
             cmp al, '4'
-                jnz mm 
+                jnz survival 
                 mov difficulty, 3
                 
                 ; SCORING CHANGE
@@ -597,6 +613,21 @@
 
                 call load_walls
                 call main_loop
+            ;---- tim ----;
+            survival:
+            cmp al, '5'
+                jnz mm
+                mov difficulty, 4
+
+                ; SCORING CHANGE
+                mov si, offset survFile     ;for Survival
+                lea di, filename
+                call copy_filename
+                ;END OF SCORING CHANGE
+
+                call load_walls
+                call main_loop
+            ;---- tim ----;
 
             mm:
             cmp al, 'b'
@@ -2157,6 +2188,10 @@ lead_page:
             call draw
             call move
             call cls
+            ;---- tim ----;
+            cmp difficulty, 4 
+            je do_survival
+            ;---- tim ----;
             jmp game_loop
             do_paused:
                 mov dh, 12
@@ -2166,10 +2201,74 @@ lead_page:
                 mov cx, strPaused_l
                 call str_out
             jmp game_loop
+            ;---- tim ----;
+            do_survival:
+                call move_fireball
+                call move_eagle
+            ;---- tim ----;
+            jmp game_loop
         ; should never reach this
             mov ah, 4ch
             int 21h
     main_loop endp
+    ;---- tim ----;
+    move_fireball proc
+        mov al, fireball_speed_x
+        sub fireball_origin_x, al
+
+        mov al, fireball_speed_y
+        sub fireball_origin_y, al
+
+        cmp fireball_origin_x, 2
+        jl fneg_velocity_x
+        cmp fireball_origin_x, 37
+        jg fneg_velocity_x
+
+        cmp fireball_origin_y, 3
+        jl fneg_velocity_y
+        cmp fireball_origin_y, 21
+        jg fneg_velocity_y
+
+        ret
+        fneg_velocity_x:
+            neg fireball_speed_x
+            ret
+        fneg_velocity_y:
+            neg fireball_speed_y
+            ret
+    move_fireball endp
+
+    ;---- tim ----;
+    move_eagle proc
+        mov al, eagle_speed_x
+        add eagle_origin_x, al
+
+        mov al, eagle_speed_y
+        add eagle_origin_y, al
+
+        cmp eagle_origin_x, 2
+        jl neg_velocity_x
+        cmp eagle_origin_x, 37
+        jg neg_velocity_x
+
+
+        cmp eagle_origin_y, 3
+        jl neg_velocity_y
+        cmp eagle_origin_y, 21
+        jg neg_velocity_y
+
+
+        ret
+        neg_velocity_x:
+            neg eagle_speed_x
+            ret
+        neg_velocity_y:
+            neg eagle_speed_y
+            ret
+
+        
+    move_eagle endp
+    ;---- tim ----;
 
     printsp proc    ; print space
         space: 
@@ -2490,6 +2589,30 @@ lead_page:
             dec bp 
             cmp bp, 0
             jne draw_wall
+        cmp difficulty, 4
+        jne draw_easy
+        
+        draw_eagle_fireball:
+            mov ax, @data
+            mov ds, ax
+            mov dh, eagle_origin_x
+            mov dl, eagle_origin_y
+            call calculate_pos
+            mov bh, 8
+            mov bl, 8
+            lea si, eagle
+            call draw_img
+        draw_fireball:
+            mov ax, @data
+            mov ds, ax
+            mov dh, fireball_origin_x
+            mov dl, fireball_origin_y
+            call calculate_pos
+            mov bh, 8
+            mov bl, 8
+            lea si, fireball
+            call draw_img
+        
         draw_easy:  
             ret
     draw endp
@@ -2673,6 +2796,8 @@ lead_page:
         je harddelay 
         cmp difficulty, 3
         je challengerdelay 
+        cmp difficulty, 4
+        je survivaldelay
 
         easydelay: ; 125000 microsec (1e848h)
             mov cx, 1
@@ -2690,6 +2815,12 @@ lead_page:
         challengerdelay: ; 10000 microsec (2710h)
             mov cx, 1
             mov dx, 2710h
+        
+        ;---- tim ----;
+        survivaldelay: ; 5000 microsec (1388h)
+            mov cx, 1
+            mov dx, 1388h
+        ;---- tim ----;
 
         calldelay:
             call delay
@@ -2816,6 +2947,7 @@ lead_page:
                
                 jmp stop
 
+
             food_collision:
                 lea si, snake_pos
                 lea di, food_pos
@@ -2845,9 +2977,8 @@ lead_page:
 
                 ; if no apple eaten
                 skip_to_rotten:
-                    jmp rotten_collision
-
-                
+                    jmp eagle_collision
+                    
             apple_eaten:
                 cmp eat_streak, 5   ; check if streak full
                 je superapl
@@ -2857,6 +2988,7 @@ lead_page:
                 add snake_length, 1
                 call evaluate_apl_score
                 jmp rand            ; move to food generation
+                jmp skip_to_rotten
 
             superapl:
                 mov eat_streak, 0     ; reset streak
@@ -2867,6 +2999,76 @@ lead_page:
                 mov bp, food_seed
                 call rng
 
+            ;w---- tim ----;
+            eagle_collision:
+                cmp difficulty, 4
+                jne rotten_collision
+                mov ax, @data
+                mov ds, ax
+                mov bh, eagle_origin_x
+                mov bl, eagle_origin_y
+                mov eagle_coords, bx
+
+                lea si, snake_pos
+                lea di, eagle_coords
+                mov ax, word ptr [si]
+                mov bx, word ptr [di]
+
+
+                inc ah
+                cmp ah, bh 
+                jng fireball_collision
+                dec ah
+
+                inc bh
+                cmp ah, bh
+                jnl fireball_collision
+
+                inc al
+                cmp al, bl 
+                jng fireball_collision 
+                dec al
+
+                inc bl
+                cmp al, bl
+                jnl fireball_collision
+
+                jmp stop
+            fireball_collision:
+                cmp difficulty, 4
+                jne rotten_collision
+                mov ax, @data
+                mov ds, ax
+                mov bh, fireball_origin_x
+                mov bl, fireball_origin_y
+                mov fireball_coords, bx
+
+                lea si, snake_pos
+                lea di, fireball_coords
+                mov ax, word ptr [si]
+                mov bx, word ptr [di]
+
+                inc ah
+                cmp ah, bh 
+                jng rotten_collision
+                dec ah
+
+                inc bh
+                cmp ah, bh
+                jnl rotten_collision
+
+                inc al
+                cmp al, bl 
+                jng rotten_collision 
+                dec al
+
+                inc bl
+                cmp al, bl
+                jnl rotten_collision
+
+                jmp stop
+            ;---- tim ----;
+
             rotten_collision:
                 lea si, snake_pos
                 lea di, rotten_pos
@@ -2875,7 +3077,7 @@ lead_page:
 
                 inc ah
                 cmp ah, bh 
-                jng wall_collision 
+                jng wall_collision
                 dec ah 
 
                 inc bh
@@ -2907,7 +3109,8 @@ lead_page:
 
                     lea di, rotten_pos
                     mov bp, rotten_seed
-                    call rng 
+                    call rng
+            
                 
             wall_collision:
                 mov ax, @data
@@ -2943,7 +3146,8 @@ lead_page:
                     inc bl
                     cmp al, bl
                     jnl check_wall_col
-                    jmp stop     
+                    jmp stop
+
     return: 
         ret
     move endp
@@ -2982,6 +3186,7 @@ lead_page:
             jmp done_apl
         survival_score:
             add snake_score, 4
+            jmp done_apl
         done_apl:
             ret    
     evaluate_apl_score endp
