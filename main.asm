@@ -61,14 +61,14 @@
     strScore db 'SCORE:'
     strScore_l equ $-strScore
 
-    strSnek db "SNEK"
+    strSnek db "SNEK V2"
     strSnek_l equ $-strSnek
 
     ;main menu
     strTitle db "BSCS 2-2, Group 2",13,10
     strTitle_l equ $-strTitle
 
-    strYear db "[v1.0] | 2024",13,10
+    strYear db "[v2.0] | 2025",13,10
     strYear_l equ $ - strYear
 
     ;main menu choices
@@ -3254,50 +3254,52 @@ lead_page:
     evaluate_rapl_score endp
 
     ; bitmaps
+    ; new snake visuals... Welcome, Py!
     snake_head_up: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
-        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
+        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h  
+        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     ;00h - black
+        DB 00h,0Ah,0Eh,0Ah,0Ah,0Eh,0Ah,00h     ;0Ah - Light Green
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;02h - Green
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     ;0Ch - Light Red
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     ;0Eh - Yellow
+        DB 00h,00h,08h,0Ah,0Ah,08h,00h,00h     ;08h - dark gray
+      snake_head_down: 
+        DB 00h,0Ah,08h,0Ah,0Ah,08h,0Ah,00h    
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     
         DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
-    snake_head_down: 
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h    
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
+        DB 00h,0Ah,0Eh,0Ah,0Ah,0Eh,0Ah,00h     
         DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
         DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_left: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
+        DB 00h,00h,00h,0Ah,0Ah,08h,00h,0Ah     ;00h- black
+        DB 00h,00h,0Ah,0Eh,0Ah,0Ah,0Ah,08h     ;0Ah - Light Green
+        DB 00h,0Ah,0Ah,0Ah,0Ah,08h,0Ah,0Ah     ;02h - Green
+        DB 0Ch,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,08h     ;0Ch - Light Red
+        DB 00h,0Ah,0Ah,0Ah,0Ah,08h,0Ah,0Ah     ;0Eh - Yellow
+        DB 00h,00h,0Ah,0Eh,0Ah,0Ah,0Ah,08h     ;08h - dark gray
+        DB 00h,00h,00h,0Ah,0Ah,08h,00h,0Ah     ;Note: it's 9x8 for some reason
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_right: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
+        DB 0Ah,00h,08h,0Ah,0Ah,0Ah,00h,00h     
+        DB 08h,0Ah,0Ah,0Ah,0Eh,0Ah,00h,00h     
+        DB 0Ah,0Ah,08h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 0Ah,0Ah,08h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 08h,0Ah,0Ah,0Ah,0Eh,0Ah,00h,00h     
+        DB 0Ah,00h,08h,0Ah,0Ah,0Ah,00h,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_body:
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,0Eh,0Ah,0Ah,08h,0Ah,00h     
+        DB 00h,0Eh,0Ah,08h,0Ah,0Ah,08h,00h     
+        DB 00h,0Ah,08h,0Eh,0Ah,0Ah,0Ah,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Eh,08h,0Ah,00h     
+        DB 00h,08h,0Ah,0Ah,08h,0Ah,0Eh,00h     
+        DB 00h,0Ah,08h,0Ah,0Ah,0Eh,0Ah,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     food_map:
         DB 00h,00h,00h,0Ah,02h,00h,00h,00h  
