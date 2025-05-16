@@ -264,16 +264,19 @@
     hardFile db 'hardCAT.txt',0
     challFile db 'challengerCAT.txt',0
     survFile db 'survCAT.txt',0
-    filename db 12 dup (?) 
+    filename db 18 dup (?) 
 
     ; SCORING PAGE Labels
     easyLabel     db 'EASY-MODE',13,10
+    easyLabel_l   equ $ - easyLabel
     medLabel      db 'MEDIUM-MODE',13,10
+    medLabel_l    equ $ - medLabel
     hardLabel     db 'HARD-MODE',13,10
+    hardLabel_l   equ $ - hardLabel
     challLabel    db 'CHALL-MODE',13,10
-    survLabel     db 'SURVI-MODE',13,10
-    diffLabel_l   equ 12 ; all labels are 12 chars including newline
-
+    challLabel_l  equ $ - challLabel
+    survLabel     db 'SURV-MODE',13,10
+    survLabel_l   equ $ - survLabel
 
     handle dw ?
     ; scores db 05h
@@ -362,7 +365,9 @@
     check_create_file proc
 
         ; Try to open the file for read/write
-        mov ax, 3d02h          ; open file
+        mov ah, 3Dh         ; open file
+        mov al, 02h
+
         mov dx, si             ; correct way to pass filename pointer
         int 21h
         jnc file_exists        ; if file exists, skip creation
@@ -376,7 +381,7 @@
         mov handle, ax
 
 
-        mov byte ptr [scores], 0  ; set record count to 0
+        mov byte ptr [scores], 0  ; store the value 0 (zero) into the first byte of the memory location scores
 
         ; Write initialized buffer to file
         mov ah, 40h
@@ -614,7 +619,7 @@
             mov es, ax
 
             ; Show difficulty prompt
-            mov dh, 7
+            mov dh, 4
             mov dl, 10
             mov bl, 0Ch
             mov cx, strDiffSelec_l
@@ -622,7 +627,7 @@
             call str_out
 
             ; EASY
-            mov dh, 10
+            mov dh, 7
             mov dl, 14
             mov bl, 0Eh
             mov cx, strEasy_l
@@ -630,25 +635,31 @@
             call str_out
 
             ; MODERATE
-            mov dh, 12
+            mov dh, 9
             mov cx, strModerate_l
             lea bp, strModerate
             call str_out
 
             ; HARD
-            mov dh, 14
+            mov dh, 11
             mov cx, strHard_l
             lea bp, strHard
             call str_out
 
             ; CHALLENGER
-            mov dh, 16
+            mov dh, 13
             mov cx, strChallenger_l
             lea bp, strChallenger
             call str_out
 
+            ; SURVIVAL
+            mov dh, 15
+            mov cx, strSurvival_l
+            lea bp, strSurvival
+            call str_out
+
             ; BACK
-            mov dh, 19
+            mov dh, 18
             mov cx, strBack_l
             lea bp, strBack
             call str_out
@@ -663,6 +674,8 @@
                 jz lead_hard
             cmp al, '4'
                 jz lead_chall
+            cmp al, '5'
+                jz lead_surv
             cmp al, 'b'
                 jne lead_diff_input
                 jmp menu_page
@@ -685,6 +698,10 @@
         lead_chall:
             mov difficulty, 3
             mov si, offset challFile
+
+        lead_surv:
+            mov difficulty, 4
+            mov si, offset survFile
 
         lead_set_file:
             lea di, filename
@@ -1124,44 +1141,49 @@
         ret
     copy_filename endp
 
-lead_page:
-    mov ax, @data
-    mov es, ax
-    call cls
+    lead_page:
+        mov ax, @data
+        mov es, ax
+        call cls
 
-    ; Score Labeling I found, unsure of a cleaner way of doing this :<
-    ; -- Display current difficulty label --
-    cmp difficulty, 0
-    je show_easy
-    cmp difficulty, 1
-    je show_medium
-    cmp difficulty, 2
-    je show_hard
-    cmp difficulty, 3
-    je show_chall
-    cmp difficulty, 4
-    je show_surv
+        ; Score Labeling I found, unsure of a cleaner way of doing this :<
+        ; -- Display current difficulty label --
+        cmp difficulty, 0
+        je show_easy
+        cmp difficulty, 1
+        je show_medium
+        cmp difficulty, 2
+        je show_hard
+        cmp difficulty, 3
+        je show_chall
+        cmp difficulty, 4
+        je show_surv
 
-    show_easy:
-        lea bp, easyLabel
-        jmp print_diff
-    show_medium:
-        lea bp, medLabel
-        jmp print_diff
-    show_hard:
-        lea bp, hardLabel
-        jmp print_diff
-    show_chall:
-        lea bp, challLabel
-    show_surv:
-        lea bp, survLabel
+        show_easy:
+            lea bp, easyLabel
+            mov cx, easyLabel_l         ; param for str_out
+            jmp print_diff
+        show_medium:
+            lea bp, medLabel
+            mov cx, medLabel_l
+            jmp print_diff
+        show_hard:
+            lea bp, hardLabel
+            mov cx, hardLabel_l
+            jmp print_diff
+        show_chall:
+            lea bp, challLabel
+            mov cx, challLabel_l
+            jmp print_diff
+        show_surv:
+            lea bp, survLabel
+            mov cx, survLabel_l
 
-    print_diff:
-        mov dh, 4      ; row above "LEADERBOARD"
-        mov dl, 14
-        mov cx, diffLabel_l
-        mov bl, 0Eh    ; yellow color
-        call str_out
+        print_diff:
+            mov dh, 4      ; row above "LEADERBOARD"
+            mov dl, 14
+            mov bl, 0Eh    ; yellow color
+            call str_out
 
 
     ;write leaderboard prompt
