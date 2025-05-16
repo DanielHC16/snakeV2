@@ -4,6 +4,7 @@
 
     snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
+    snake_score dw 0
     key_pressed db ?
     prev_key db ?
     time_now db 00h
@@ -17,15 +18,28 @@
     paused db 0
     started db 0 ; if 1, delay for one second before moving
     fail_msg db "File creation failed.$"
-    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard, 3 = challenger, 4 = Survival
+    difficulty db ?  ; change difficulty here | 0 = Easy, 1 = Med, 2 = Hard, 3 = Challenger, 4 = Survival
 
-    
 
     med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
     med_pos1 dw 30,080ch,0b0ch,0c0ch,1204h,1205h,1206h,1207h,1211h,1212h,1213h,1214h,1304h,1305h,1306h,1307h,1311h,1312h,1313h,1314h,1404h,1405h,1406h,1407h,1411h,1412h,1413h,1414h,1a0ch,1b0ch,1e0ch
    
     hard_pos0 dw 60,0302h,0303h,0304h,0305h,0306h,0307h,0402h,0403h,0404h,0405h,0406h,0407h,050fh,060eh,0313h,0314h,0413h,0414h,0e0eh,0e0fh,0e10h,0e11h,0f0eh,0f0fh,0f10h,0f11h,1010h,1011h,1110h,1111h,1507h,1508h,1607h,1608h,1707h,1708h,1709h,170ah,1807h,1808h,1809h,180ah,200ah,2109h,2204h,2205h,2304h,2305h,2211h,2212h,2213h,2214h,2215h,2216h,2311h,2312h,2313h,2314h,2315h,2316h
     hard_pos1 dw 60,0311h,0312h,0411h,0412h,050bh,050ch,050dh,0513h,0514h,060bh,060ch,060dh,0610h,0611h,0613h,0614h,0710h,0711h,0d0bh,0d0ch,0d0dh,100bh,100ch,100dh,1206h,1207h,1211h,1212h,1306h,1307h,1311h,1312h,1406h,1407h,1411h,1412h,160bh,160ch,160dh,190bh,190ch,190dh,1f07h,1f08h,2004h,2005h,2007h,2008h,200bh,200ch,200dh,2104h,2105h,210bh,210ch,210dh,2206h,2207h,2306h,2307h
+
+    challenger_pos0 dw 60, \
+    0702h, 0703h, 0704h, 0705h, 0706h, 0707h, 0708h, 0709h, 070ah, 070bh, 070ch, 070dh, \
+    0d17h, 0d16h, 0d15h, 0d14h, 0d13h, 0d12h, 0d11h, 0d10h, 0d0fh, 0d0eh, 0d0dh, 0d0ch, \
+    1302h, 1303h, 1304h, 1305h, 1306h, 1307h, 1308h, 1309h, 130ah, 130bh, 130ch, 130dh, \
+    1917h, 1916h, 1915h, 1914h, 1913h, 1912h, 1911h, 1910h, 190fh, 190eh, 190dh, 190ch, \
+    1f02h, 1f03h, 1f04h, 1f05h, 1f06h, 1f07h, 1f08h, 1f09h, 1f0ah, 1f0bh, 1f0ch, 1f0dh
+
+    challenger_pos1 dw 60, \
+    0717h, 0716h, 0715h, 0714h, 0713h, 0712h, 0711h, 0710h, 070fh, 070eh, 070dh, 070ch, \
+    0d02h, 0d03h, 0d04h, 0d05h, 0d06h, 0d07h, 0d08h, 0d09h, 0d0ah, 0d0bh, 0d0ch, 0d0dh, \
+    1317h, 1316h, 1315h, 1314h, 1313h, 1312h, 1311h, 1310h, 130fh, 130eh, 130dh, 130ch, \
+    1902h, 1903h, 1904h, 1905h, 1906h, 1907h, 1908h, 1909h, 190ah, 190bh, 190ch, 190dh, \
+    1f17h, 1f16h, 1f15h, 1f14h, 1f13h, 1f12h, 1f11h, 1f10h, 1f0fh, 1f0eh, 1f0dh, 1f0ch
 
     active_wall_pos dw 61 dup (?)
 
@@ -36,7 +50,7 @@
     strSnek_l equ $-strSnek
 
     ;main menu
-    strTitle db "BSCS 2-2, Group 1",13,10
+    strTitle db "BSCS 2-2, Group 2",13,10
     strTitle_l equ $-strTitle
 
     strYear db "[v1.0] | 2024",13,10
@@ -68,11 +82,12 @@
     strHard db "[3] HARD",13,10
     strHard_l equ $ - strHard
 
-    ;Additional features - START
     strChallenger db "[4] CHALLENGER",13,10
     strChallenger_l equ $ - strChallenger
-    ;Additional features - END
-    ; add survival here*
+
+    strSurvival db "[5] SURVIVAL",13,10
+    strSurvival_l equ $ - strSurvival
+
 
     strBack db "[B] BACK",13,10
     strBack_l equ $ - strBack
@@ -242,12 +257,13 @@
 
     ; OLD: filename db 'data.txt', 0
 
-    ;NEW
+
     ; Scoring Changes - Score used to be stored in file name DATA.TXT, ensures that itll make its own score category
     easyFile db 'easyCAT.txt',0
     mediumFile db 'mediumCAT.txt',0
     hardFile db 'hardCAT.txt',0
     challFile db 'challengerCAT.txt',0
+    survFile db 'survCAT.txt',0
     filename db 12 dup (?) 
 
     ; SCORING PAGE Labels
@@ -255,6 +271,7 @@
     medLabel      db 'MEDIUM-MODE',13,10
     hardLabel     db 'HARD-MODE',13,10
     challLabel    db 'CHALL-MODE',13,10
+    survLabel     db 'SURVI-MODE',13,10
     diffLabel_l   equ 12 ; all labels are 12 chars including newline
 
 
@@ -280,11 +297,11 @@
 
 .code    
     main proc
-    mov ax, 0013h
-    int 10h
-
+    mov ax, 0013h       ; set video mode 13h | 320x200 pixels | graphics
+    int 10h             ; draw_img procedure writes directly to VGA video memory at 0A000h segment
+                        ; segment (0xA000) is only mapped to video memory when you're in graphics mode like mode 13h
     call init_files
-
+    
     mov ax, @data
     mov ds, ax 
     mov ax, 0001h
@@ -304,7 +321,7 @@
         jmp top_bot_border
     
     vertical_border:
-        mov ax, 0002h
+        mov ax, 0002h           ; Starting position for left/right border
     left_right_border:
         cmp al, 18h
         je menu_page
@@ -334,6 +351,9 @@
         call check_create_file
 
         lea si, challFile
+        call check_create_file
+        
+        lea si, survFile
         call check_create_file
         
         ret 
@@ -442,6 +462,7 @@
         lea bp, strExit
         call str_out
         ;get resp
+
         menu_page_start:
 
         call resp 
@@ -462,7 +483,9 @@
 
         exit:
             call cls
-            mov ah, 4ch
+            mov ax, 0003h       ; go back to text mode
+            int 10h
+            mov ah, 4Ch
             int 21h 
 
         diff_page:
@@ -474,7 +497,7 @@
             mov es, ax
 
             ;write diff prompt
-            mov dh, 7 ;row
+            mov dh, 4 ;row
             mov dl, 10 ;column
             mov bl, 0Ch ; red
             mov cx, strDiffSelec_l
@@ -482,7 +505,7 @@
             call str_out
 
             ;write diff choices
-            mov dh, 10
+            mov dh, 7
             mov dl, 14
             mov bl, 0Eh ; yellow
                 ;easy
@@ -490,31 +513,37 @@
             lea bp, strEasy
             call str_out
                 ;mod
-            mov dh, 12
+            mov dh, 9
             mov cx, strModerate_l
             lea bp, strModerate
             call str_out
                 ;hard
-            mov dh, 14
+            mov dh, 11
             mov cx, strHard_l
             lea bp, strHard
             call str_out
 
-                ;Challenger
-            mov dh, 16
+                ;challenger
+            mov dh, 13
             mov cx, strChallenger_l
             lea bp, strChallenger
             call str_out
+            
+                ;Survival
+            mov dh, 15
+            mov cx, strSurvival_l
+            lea bp, strSurvival
+            call str_out
 
                 ;back
-            mov dh, 19
+            mov dh, 18
             mov cx, strBack_l
             lea bp, strBack
             call str_out
 
-            diff_page_start:
-            ;get resp
-            call resp
+        diff_page_start:
+
+            call resp                       ; get resp, returns ah = bios code | al = ascii code
             cmp al, '1'
                 jnz med
                 mov difficulty, 0
@@ -568,10 +597,18 @@
 
                 call load_walls
                 call main_loop
+            challenger:
+            cmp al, '4'
+                jnz mm
+                mov difficulty, 3
+                call load_walls
+                call main_loop
+
             mm:
             cmp al, 'b'
                 je df_menu
                 jmp diff_page_start
+
                 df_menu: jmp menu_page
         
         lead_diff_page: ; new Leaderboard page
@@ -670,13 +707,12 @@
         int 1ah
         mov ax, dx
         xor dx, dx
-        mov cx, 10
-        div cx
-        xor dx, 01h ;get the least significant bit
+        mov cx, 2
+        div cx  ; BUG FIX: remainder on dx 0 or 1, before it was 0-9
         ;0 or 1 is now stored in dl
         cmp difficulty, 1
         jnz load_hard
-            cmp dl, 1
+            cmp dl, 1 ;cmp the randomizer
             jnz medzero
                 lea si, med_pos1
                 jmp load_active
@@ -684,13 +720,24 @@
                 lea si, med_pos0
                 jmp load_active
         load_hard:
-            cmp dl, 1
+            cmp difficulty, 2
+            jnz load_challenger
+            cmp dl, 1 ;cmp the randomizer
             jnz hardzero
                 lea si, hard_pos1
                 jmp load_active
             hardzero:
                 lea si, hard_pos0
                 jmp load_active
+        load_challenger:
+            cmp dl, 1 ;cmp the randomizer
+            jnz challengerzero
+                lea si, challenger_pos1
+                jmp load_active
+            challengerzero:
+                lea si, challenger_pos0
+                jmp load_active
+
         load_active:
             lea di, active_wall_pos
             mov cx, word ptr [si]
@@ -727,7 +774,7 @@
         lea bp, strScore_GO
         call str_out
             ;write score int
-            mov ax, snake_length
+            mov ax, snake_score
             mov cx, 03h
             divide_score:         ; convert to decimal
                 xor dx, dx
@@ -936,7 +983,7 @@
             mov ah, 7
             int 21h
             mov byte ptr [si], '$'
-            mov ax, snake_length
+            mov ax, snake_score
             lea si, iscore 
             mov byte ptr [si+1], al
             
@@ -1083,7 +1130,6 @@
         ret
     copy_filename endp
 
-
 lead_page:
     mov ax, @data
     mov es, ax
@@ -1099,6 +1145,8 @@ lead_page:
     je show_hard
     cmp difficulty, 3
     je show_chall
+    cmp difficulty, 4
+    je show_surv
 
     show_easy:
         lea bp, easyLabel
@@ -1111,6 +1159,8 @@ lead_page:
         jmp print_diff
     show_chall:
         lea bp, challLabel
+    show_surv:
+        lea bp, survLabel
 
     print_diff:
         mov dh, 4      ; row above "LEADERBOARD"
@@ -1223,116 +1273,142 @@ lead_page:
             dec cl
             jnz ldbuf
 
-        mov ah, 02h
-        mov dl, 0ah
-        int 21h 
 
-        push cx
-        mov cx, 16
-        call printsp 
-       
-        pop cx
-        lea dx, strbuf
-        mov ah, 09h
-        int 21h
+        mov ax, @data
+        mov ds, ax
 
-        mov ah, 02h
-        mov dl, 20h
+        mov ax, 3d02h
+        lea dx, filename
         int 21h
-        
-        mov ah, byte ptr [si]
+        jnc read
+
+        lea si, scores
+        mov ch, byte ptr [si]
+        cmp ch, 0
+        je back_to_menu
+        ;ch = number of records
         inc si
-        mov al, byte ptr [si]
-        push cx
-        mov cx, 03h
-        int_score:         ; convert to decimal (thank u raffy)
-            xor dx, dx
-            mov bx, 0ah
-            div bx
-            push dx
-        loop int_score
-        mov cx, 03h
-        printnum:
-            pop dx
-            add dx, '0'
-            mov ah, 02 
+        iter_scores:
+            lea di, strbuf
+            mov cl, 04h
+            ldbuf:
+                mov dl, byte ptr [si]
+                mov byte ptr [di], dl
+                inc di
+                inc si
+                dec cl
+                jnz ldbuf
+
+            mov ah, 02h
+            mov dl, 0ah
             int 21h
-        loop printnum
-        inc si
-        pop cx
-        dec ch
-        mov ah, 02h
-        mov dl, 10
-        int 21h
-    jnz iter_scores
 
-        back_to_menu:
-        mov dl, 14
-        mov bl, 0Eh ; yellow
-        mov dh, 19
-        mov cx, strBack_l
-        lea bp, strBack
-        call str_out
+            push cx
+            mov cx, 16
+            call printsp
 
-        call menu_bg_draw
+            pop cx
+            lea dx, strbuf
+            mov ah, 09h
+            int 21h
 
-        wait_resp:
-        call resp
-        cmp al, 'b'
-            je lead_back
-            jmp wait_resp
+            mov ah, 02h
+            mov dl, 20h
+            int 21h
 
-            lead_back:
-                jmp menu_page    
-        ret
+            mov ah, byte ptr [si]
+            inc si
+            mov al, byte ptr [si]
+            push cx
+            mov cx, 03h
+            int_score:         ; convert to decimal (thank u raffy)
+                xor dx, dx
+                mov bx, 0ah
+                div bx
+                push dx
+            loop int_score
+            mov cx, 03h
+            printnum:
+                pop dx
+                add dx, '0'
+                mov ah, 02
+                int 21h
+            loop printnum
+            inc si
+            pop cx
+            dec ch
+            mov ah, 02h
+            mov dl, 10
+            int 21h
+            jnz iter_scores
 
-    menu_bg_draw PROC
-        ;draw left_1
-        mov dh, 0
-        mov dl, 7
-        call calculate_pos
-        lea si, menu_bg_left_1
-        mov bh, 56
-        mov bl, 144
-        call draw_img
+            back_to_menu:
+            mov dl, 14
+            mov bl, 0Eh ; yellow
+            mov dh, 19
+            mov cx, strBack_l
+            lea bp, strBack
+            call str_out
 
-        ;draw left_2
-        add dh, 7
-        mov dl, 16
-        call calculate_pos
-        lea si, menu_bg_left_2
-        mov bh, 48
-        mov bl, 72
-        call draw_img
+            call menu_bg_draw
 
-        ;draw mid
-        add dh, 6
-        mov dl, 22
-        call calculate_pos
-        lea si, menu_bg_mid
-        mov bh, 104
-        mov bl, 24
-        call draw_img
+            wait_resp:
+            call resp
+            cmp al, 'b'
+                je lead_back
+                jmp wait_resp
 
-        ;draw right
-        add dh, 13
-        mov dl, 16
-        call calculate_pos
-        lea si, menu_bg_right_2
-        mov bh, 72
-        mov bl, 72
-        call draw_img
-        
-        add dh, 9
-        mov dl, 11
-        call calculate_pos
-        lea si, menu_bg_right_1
-        mov bh, 40
-        mov bl, 112
-        call draw_img
+                lead_back:
+                    jmp menu_page
+            ret
 
-        ret
-    menu_bg_draw ENDP
+            menu_bg_draw PROC
+                ;draw left_1
+                mov dh, 0
+                mov dl, 7
+                call calculate_pos
+                lea si, menu_bg_left_1
+                mov bh, 56
+                mov bl, 144
+                call draw_img
+
+                ;draw left_2
+                add dh, 7
+                mov dl, 16
+                call calculate_pos
+                lea si, menu_bg_left_2
+                mov bh, 48
+                mov bl, 72
+                call draw_img
+
+                ;draw mid
+                add dh, 6
+                mov dl, 22
+                call calculate_pos
+                lea si, menu_bg_mid
+                mov bh, 104
+                mov bl, 24
+                call draw_img
+
+                ;draw right
+                add dh, 13
+                mov dl, 16
+                call calculate_pos
+                lea si, menu_bg_right_2
+                mov bh, 72
+                mov bl, 72
+                call draw_img
+
+                add dh, 9
+                mov dl, 11
+                call calculate_pos
+                lea si, menu_bg_right_1
+                mov bh, 40
+                mov bl, 112
+                call draw_img
+
+                ret
+            menu_bg_draw ENDP
 
     mech_page:
         ; ch = page tracker
@@ -2069,9 +2145,11 @@ lead_page:
             dec ch 
             jmp skip2
 
-        mech_move_right_inc: inc ch
+        mech_move_right_inc:
+            inc ch
         
-        skip2: call navigate_mech_page
+        skip2:
+            call navigate_mech_page
         ret
     mech_get_resp endp
 
@@ -2089,6 +2167,7 @@ lead_page:
         mov byte ptr key_pressed, 'e'
         mov byte ptr prev_key, 'f'
         mov bp, snake_length 
+
         clear_snake:
             cmp bp, 0
             je start
@@ -2097,8 +2176,11 @@ lead_page:
             mov word ptr [si], 0 
             jmp clear_snake
         
-        start: mov snake_length, 0 ; reset score for next game loop
-               mov started, 0
+        start:
+            mov snake_length, 0 ; reset for next game loop
+            mov snake_score, 0
+            mov started, 0
+
         game_loop:
             call header
             call input
@@ -2139,26 +2221,30 @@ lead_page:
         ret
     printnl endp
 
-    cls proc ; clears the screen
+    cls proc        ; clears the screen
         mov ah, 07h          ; scroll down function
         mov al, 0            ; number of lines to scroll
-        mov cx, 0
-        mov dx, 9090
-        mov bh, 00h          ; clear entire screen
+        mov cx, 0            ; row 0, col 0
+        mov dx, 184Fh        ; row 24, col 79
+        mov bh, 00h          ; black
         int 10h
         ret
     cls endp
 
-    str_out proc
-        mov ax, 1301h   
-        mov bh, 00h   ;page
+    str_out proc        ; display a string
+    ; args :
+    ;   bl = text attribute (color) | cx = number of characters to print |
+    ;   DH, DL = row, column of where to start writing | ES:BP = pointer to the string to print
+
+        mov ax, 1301h   ; AH=13h (write string), AL=01h (update cursor after writing)
+        mov bh, 00h     ; page
         int 10h
         ret 
     str_out endp
 
+    ; no params
+    ; returns: AH = BIOS Scan code | AL = ASCII character
     resp PROC
-        mov ah, 01h         ;get resp
-        int 16h
         mov ah, 00h         ;read resp 
         int 16h
         ret
@@ -2176,7 +2262,7 @@ lead_page:
         lea bp, strScore ; string in es:bp 
         int 10h
 
-        mov ax, snake_length
+        mov ax, snake_score
         mov cx, 03h
         divide:         ; convert to decimal
             xor dx, dx
@@ -2440,7 +2526,21 @@ lead_page:
             ret
     draw endp
 
-    calculate_pos proc ; args: dx = coordinate | ret: di = coord in vram
+    ; ======== CALCULATE SCREEN OFFSET ========
+    ;   Converts a grid coordinate into a VGA memory offset.
+    ;
+    ; Params:
+    ;   DX = Coordinate (DH = row, DL = column)
+    ;
+    ; Returns:
+    ;   DI = Offset in video memory (for mode 13h / 320x200)
+    ;
+    ; Notes:
+    ;   - Assumes each tile/sprite is 8x8 pixels.
+    ;   - 1 byte per pixel (Mode 13h, 0A000h segment).
+    ;   - Use before drawing to video memory.
+
+    calculate_pos proc
         mov ax, @code
         mov ds, ax
         push dx
@@ -2448,7 +2548,7 @@ lead_page:
             mul dh
             mov di, ax
             mov ax, 8*320
-            mov bx, 0
+            xor bx, bx
             add bl, dl
             mul bx 
             add di, ax
@@ -2456,8 +2556,21 @@ lead_page:
         ret
     calculate_pos endp
 
-    draw_img proc   ; args: si = bitmap addr | bx = sprite dimensions (bh=height, hl=width) ; NOTE: calculate the position of the sprite first
-        mov ax, 0A000h  ; vram segment
+    ; ======== DRAW IMAGE TO SCREEN ========
+    ;   Draws a sprite onto the screen using XOR for pixel effect.
+    ;
+    ; Arguments:
+    ;   SI = Address of bitmap data (sprite)
+    ;   BX = Sprite dimensions → BH = height (rows), BL = width (columns)
+    ;   DI = Destination offset in video memory (must be calculated first)
+    ;
+    ; Notes:
+    ;   - DI (coordinate) must be set using calculate_pos before calling this procedure.
+    ;   - Uses XOR rendering (non-destructive / toggle effect).
+    ;   - Assumes 320x200 VGA mode (segment A000h, 1 byte per pixel).
+
+    draw_img proc
+        mov ax, 0A000h  ; Set ES to VGA video memory segment
         mov es, ax   
         mov cl, bl  
         y_axis:
@@ -2478,12 +2591,26 @@ lead_page:
         ret
     draw_img endp 
 
-    rng proc       ; args : di = addr of variable  |  bp = seed
+    ; ======== RANDOM POSITION GENERATOR ========
+    ;   Generates a new (X,Y) grid coordinate that:
+    ;     - Stays within game bounds
+    ;     - Avoids food, rotten, walls, and the snake body
+    ;
+    ; Params:
+    ;   DI = Address of variable to store result (e.g., food_pos, rotten_pos)
+    ;   BP = Seed value for XOR-based pseudo randomness
+    ;
+    ; Returns:
+    ;   Stores coordinate pair in [DI] as a word: BH = X, BL = Y
+
+    rng proc
         mov ax, @data
         mov ds, ax
+
     randstart:
+        ; -------- Generate Random Y (row) --------
         mov ah, 00h
-        int 1ah 
+        int 1ah     ; ; Get system time → DX = clock ticks
         xor dx, bp
 
         mov ax, dx 
@@ -2494,6 +2621,7 @@ lead_page:
         inc dl 
         mov bl, dl ; y coord
         
+        ; -------- Generate Random X (column) --------
         mov ah, 00h
         int 1ah
         xor dx, bp 
@@ -2548,7 +2676,7 @@ lead_page:
             mov bp, snake_length 
             snake_loop:
                 cmp bp, 0
-                je rngdone
+                jl rngdone          ; changed to if legnth is negative
                 dec bp
                 mov ax, word ptr [si]
                 mov bx, word ptr [di] 
@@ -2563,6 +2691,8 @@ lead_page:
             ret
     rng endp 
 
+    ; ======== MOVE PROCEDURE ========
+
     move proc
         mov ax, @data
         mov ds, ax
@@ -2574,8 +2704,8 @@ lead_page:
         cmp difficulty, 2
         je harddelay 
         cmp difficulty, 3
-        je challengerdelay
-        
+        je challengerdelay 
+
         easydelay: ; 125000 microsec (1e848h)
             mov cx, 1
             mov dx, 0e848h
@@ -2588,10 +2718,10 @@ lead_page:
         harddelay: ; 75000 microsec (124f8h)
             mov cx, 1
             mov dx, 24f8h
-
-        challengerdelay: ; 75000 microsec (EA60)
-            mov cx, 0
-            mov dx, 0EA60h
+            
+        challengerdelay: ; 10000 microsec (2710h)
+            mov cx, 1
+            mov dx, 2710h
 
         calldelay:
             call delay
@@ -2726,34 +2856,48 @@ lead_page:
 
                 inc ah
                 cmp ah, bh 
-                jng rotten_collision 
+                jng skip_to_rotten 
                 dec ah 
 
                 inc bh
                 cmp ah, bh
-                jnl rotten_collision
+                jnl skip_to_rotten
 
                 inc al
                 cmp al, bl 
-                jng rotten_collision 
+                jng skip_to_rotten 
                 dec al
 
                 inc bl
                 cmp al, bl
-                jnl rotten_collision 
+                jnl skip_to_rotten 
 
-                cmp eat_streak, 5
+                ; if apple eaten
+                jmp apple_eaten
+
+                ; if no apple eaten
+                skip_to_rotten:
+                    jmp rotten_collision
+
+                
+            apple_eaten:
+                cmp eat_streak, 5   ; check if streak full
                 je superapl
-                inc snake_length
+
+                ; normal apple score
                 inc eat_streak
-                jmp rand
-                superapl:
-                    add snake_length, 3
-                    mov eat_streak, 0                    
-                rand: 
-                    lea di, food_pos
-                    mov bp, food_seed
-                    call rng
+                add snake_length, 1
+                call evaluate_apl_score
+                jmp rand            ; move to food generation
+
+            superapl:
+                mov eat_streak, 0     ; reset streak
+                call evaluate_sapl_score
+
+            rand: 
+                lea di, food_pos
+                mov bp, food_seed
+                call rng
 
             rotten_collision:
                 lea si, snake_pos
@@ -2790,7 +2934,9 @@ lead_page:
                     shl bx, 1   ; basically bx *= 2
                     mov word ptr [si+bx], 0
 
-                    dec snake_length                    
+                    dec snake_length 
+                    call evaluate_rapl_score      ; reduce score base on difficulty
+
                     lea di, rotten_pos
                     mov bp, rotten_seed
                     call rng 
@@ -2840,6 +2986,99 @@ lead_page:
         int 15h
         ret
     delay endp   
+
+    ; adds apple score based on diffuculty | params: ds - points to @data segment, 
+    evaluate_apl_score proc
+        cmp difficulty, 0 
+        je easy_score
+        cmp difficulty, 1
+        je med_score
+        cmp difficulty, 2
+        je hard_score
+        cmp difficulty, 3
+        je challenger_score
+        cmp difficulty, 4
+        je survival_score
+
+        easy_score:
+            add snake_score, 1
+            jmp done_apl
+        med_score:
+            add snake_score, 2
+            jmp done_apl
+        hard_score:
+            add snake_score, 3
+            jmp done_apl
+        challenger_score:
+            add snake_score, 4
+            jmp done_apl
+        survival_score:
+            add snake_score, 4
+        done_apl:
+            ret    
+    evaluate_apl_score endp
+
+    ; adds super apple score based on diffuculty | params: ds - points to @data segment, 
+    evaluate_sapl_score proc
+        cmp difficulty, 0 
+        je easy_super_score
+        cmp difficulty, 1
+        je med_super_score
+        cmp difficulty, 2
+        je hard_super_score
+        cmp difficulty, 3
+        je challenger_super_score
+        cmp difficulty, 4
+        je survival_super_score
+
+        easy_super_score:
+            add snake_score, 3
+            jmp done_sapl
+        med_super_score:
+            add snake_score, 4
+            jmp done_sapl
+        hard_super_score:
+            add snake_score, 5
+            jmp done_sapl
+        challenger_super_score:
+            add snake_score, 6
+            jmp done_sapl
+        survival_super_score:
+            add snake_score, 6
+        done_sapl:
+            ret
+    evaluate_sapl_score endp
+
+    ; subtract score based on diffuculty | params: ds - points to @data segment, 
+    evaluate_rapl_score proc
+        cmp difficulty, 0 
+        je easy_rapl
+        cmp difficulty, 1
+        je med_rapl
+        cmp difficulty, 2
+        je hard_rapl
+        cmp difficulty, 3
+        je challenger_rapl
+        cmp difficulty, 4
+        je survival_rapl
+
+        easy_rapl:
+            sub snake_score, 1
+            jmp done_rapl
+        med_rapl:
+            sub snake_score, 2
+            jmp done_rapl
+        hard_rapl:
+            sub snake_score, 3
+            jmp done_rapl
+        challenger_rapl:
+            sub snake_score, 4
+            jmp done_rapl
+        survival_rapl:
+            sub snake_score, 4
+        done_rapl:
+            ret
+    evaluate_rapl_score endp
 
     ; bitmaps
     snake_head_up: 
@@ -2895,25 +3134,43 @@ lead_page:
         DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h  
-        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+        DB 00h,00h,00h,00h,00h,00h,00h,00h
+    fireball:
+	    DB 00h,04h,04h,04h,04h,04h,04h,00h  
+        DB 04h,04h,06h,06h,06h,06h,04h,04h  
+        DB 04h,06h,0Eh,0Eh,0Eh,0Eh,06h,04h  
+        DB 04h,0Eh,0Eh,0Fh,0Fh,0Eh,0Eh,04h  
+        DB 04h,0Eh,0Fh,0Fh,0Fh,0Fh,0Eh,04h  
+        DB 04h,0Eh,0Fh,0Fh,0Fh,0Fh,0Eh,04h  
+        DB 04h,06h,06h,06h,06h,06h,06h,04h  
+        DB 00h,04h,04h,04h,04h,04h,04h,00h
+    eagle:
+        DB 00h,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,00h  
+        DB 00h,08h,0Fh,0Fh,0Fh,0Fh,08h,00h  
+        DB 00h,0Fh,08h,0Fh,0Fh,08h,0Fh,00h  
+        DB 00h,0Eh,00h,0Fh,0Fh,00h,0Eh,00h  
+        DB 00h,0Eh,00h,0Eh,0Eh,00h,0Eh,00h  
+        DB 00h,0Fh,0Fh,0Eh,0Eh,0Fh,0Fh,00h  
+        DB 00h,08h,0Fh,0Fh,0Fh,0Fh,08h,00h  
+        DB 00h,06h,06h,06h,06h,06h,06h,00h
     rotten_apple:
         DB 00h,00h,00h,06h,06h,00h,00h,00h  
         DB 00h,00h,0Ah,00h,00h,02h,00h,00h  
         DB 00h,02h,0Fh,02h,0Ah,02h,02h,00h  
-        DB 00h,0Fh,06h,06h,02h,06h,02h,00h  
-        DB 00h,06h,06h,02h,06h,06h,06h,00h  
-        DB 00h,06h,06h,06h,06h,07h,07h,00h  
-        DB 00h,00h,06h,06h,07h,07h,00h,00h  
+        DB 00h,0Fh,0Ch,0Ch,02h,0Ch,02h,00h  
+        DB 00h,0Ch,0Ch,02h,0Ch,0Ch,0Ch,00h  
+        DB 00h,0Ch,0Ch,0Ch,0Ch,02h,02h,00h  
+        DB 00h,00h,0Ch,0Ch,02h,02h,00h,00h  
         DB 00h,00h,00h,00h,00h,00h,00h,00h  
     super_apple:
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h  
-        DB 00h,00h,0Eh,00h,00h,0Eh,00h,00h  
-        DB 00h,0Eh,0Fh,0Eh,0Eh,0Eh,0Eh,00h  
-        DB 00h,0Fh,0Dh,0Dh,0Eh,0Dh,0Eh,00h  
-        DB 00h,0Dh,0Dh,0Eh,0Dh,0Dh,0Dh,00h  
-        DB 00h,0Dh,0Dh,0Dh,0Dh,05h,05h,00h  
-        DB 00h,00h,0Dh,0Dh,05h,05h,00h,00h  
-        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+        DB 03h,0Bh,00h,04h,04h,00h,0Dh,0Ch  
+        DB 0Bh,00h,0Fh,00h,00h,0Eh,00h,0Dh  
+        DB 00h,0Fh,0Fh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Fh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Fh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 0Bh,00h,0Eh,0Eh,0Eh,0Eh,00h,0Dh  
+        DB 03h,0Bh,00h,00h,00h,00h,0Dh,0Ch  
     wall:
         DB 06h,04h,06h,06h,06h,06h,04h,06h
         DB 04h,04h,06h,06h,06h,06h,04h,04h
