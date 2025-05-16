@@ -1,9 +1,9 @@
 *.exe
 *.map
 *.obj
-
 build.bat
 DATA.TXT
-
 test
-
+CHALLENG.TXT
+HARDCAT.TXT
+*.TXT

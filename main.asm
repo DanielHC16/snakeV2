@@ -1,6 +1,7 @@
 .model small
 .stack 100h
 .data
+
     snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
     snake_score dw 0
@@ -16,7 +17,9 @@
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
     started db 0 ; if 1, delay for one second before moving
-    difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard 3 = challenger 4 = survival
+    fail_msg db "File creation failed.$"
+    difficulty db ?  ; change difficulty here | 0 = Easy, 1 = Med, 2 = Hard, 3 = Challenger, 4 = Survival
+
 
     med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
     med_pos1 dw 30,080ch,0b0ch,0c0ch,1204h,1205h,1206h,1207h,1211h,1212h,1213h,1214h,1304h,1305h,1306h,1307h,1311h,1312h,1313h,1314h,1404h,1405h,1406h,1407h,1411h,1412h,1413h,1414h,1a0ch,1b0ch,1e0ch
@@ -50,7 +53,7 @@
     strTitle db "BSCS 2-2, Group 2",13,10
     strTitle_l equ $-strTitle
 
-    strYear db "[v2.0] | 2025",13,10
+    strYear db "[v1.0] | 2024",13,10
     strYear_l equ $ - strYear
 
     ;main menu choices
@@ -84,6 +87,7 @@
 
     strSurvival db "[5] SURVIVAL",13,10
     strSurvival_l equ $ - strSurvival
+
 
     strBack db "[B] BACK",13,10
     strBack_l equ $ - strBack
@@ -251,7 +255,26 @@
     ;player input
     charResp db ?
 
-    filename db 'data.txt', 0
+    ; OLD: filename db 'data.txt', 0
+
+
+    ; Scoring Changes - Score used to be stored in file name DATA.TXT, ensures that itll make its own score category
+    easyFile db 'easyCAT.txt',0
+    mediumFile db 'mediumCAT.txt',0
+    hardFile db 'hardCAT.txt',0
+    challFile db 'challengerCAT.txt',0
+    survFile db 'survCAT.txt',0
+    filename db 12 dup (?) 
+
+    ; SCORING PAGE Labels
+    easyLabel     db 'EASY-MODE',13,10
+    medLabel      db 'MEDIUM-MODE',13,10
+    hardLabel     db 'HARD-MODE',13,10
+    challLabel    db 'CHALL-MODE',13,10
+    survLabel     db 'SURVI-MODE',13,10
+    diffLabel_l   equ 12 ; all labels are 12 chars including newline
+
+
     handle dw ?
     ; scores db 05h
     ;        db 'JOE$', 000h, 010h
@@ -262,23 +285,29 @@
     ;----expected output from scores.asm
     ; JOE 016 BEN 015 GEK 009 KIM 004 JON 001
 
-    scores db 00h, 6*50 dup (0)
     ;inputs here
     uname db 'JOE$'
     iscore db 000h, 010h
     strbuf db 4 dup(?)
     screbuf db 00h
-  
-.code
+    
+    scores db 00h, 6*50 dup (0)
+
+
+
+.code    
     main proc
     mov ax, 0013h       ; set video mode 13h | 320x200 pixels | graphics
     int 10h             ; draw_img procedure writes directly to VGA video memory at 0A000h segment
                         ; segment (0xA000) is only mapped to video memory when you're in graphics mode like mode 13h
+    call init_files
+    
     mov ax, @data
     mov ds, ax 
     mov ax, 0001h
     lea di, border_pos
 
+   
     top_bot_border:
         cmp ah, 28h
         je vertical_border
@@ -305,6 +334,75 @@
         add di, 4
         jmp left_right_border
           
+    
+    init_files proc
+        ; Load DS segment
+        mov ax, @data
+        mov ds, ax
+
+        ; Loop through each category file
+        lea si, easyFile
+        call check_create_file
+
+        lea si, mediumFile
+        call check_create_file
+
+        lea si, hardFile
+        call check_create_file
+
+        lea si, challFile
+        call check_create_file
+        
+        lea si, survFile
+        call check_create_file
+        
+        ret 
+    init_files endp
+
+    check_create_file proc
+
+        ; Try to open the file for read/write
+        mov ax, 3d02h          ; open file
+        mov dx, si             ; correct way to pass filename pointer
+        int 21h
+        jnc file_exists        ; if file exists, skip creation
+
+        ; If file does not exist, create it
+        mov ax, 3c00h          ; create file
+        mov cx, 0              ; normal attributes
+        mov dx, si             ; correct way to pass filename pointer
+        int 21h
+        jc create_fail         ; if creation fails, abort program
+        mov handle, ax
+
+
+        mov byte ptr [scores], 0  ; set record count to 0
+
+        ; Write initialized buffer to file
+        mov ah, 40h
+        mov bx, handle
+        lea dx, scores
+        mov cx, 1fh               ; write full 31-byte structure (optional)
+        int 21h
+
+        ; Close the file
+        mov ah, 3eh
+        mov bx, handle
+        int 21h
+
+    file_exists:
+        ret
+
+    create_fail:
+        ; Display message or halt
+        mov ah, 09h
+        lea dx, fail_msg
+        int 21h
+        ; Exit to DOS cleanly
+        mov ah, 4Ch
+        int 21h
+    check_create_file endp
+
     menu_page:
         call cls
 
@@ -380,7 +478,7 @@
             jmp menu_page_start
         
             mm_diff: jmp diff_page
-            mm_lead: jmp lead_page
+            mm_lead: jmp lead_diff_page ; changed this from typical 1 page setup to multiple page leaderboard.
             mm_mech: jmp mech_page
 
         exit:
@@ -424,12 +522,14 @@
             mov cx, strHard_l
             lea bp, strHard
             call str_out
+
                 ;challenger
             mov dh, 13
             mov cx, strChallenger_l
             lea bp, strChallenger
             call str_out
-                ;challenger
+            
+                ;Survival
             mov dh, 15
             mov cx, strSurvival_l
             lea bp, strSurvival
@@ -447,17 +547,54 @@
             cmp al, '1'
                 jnz med
                 mov difficulty, 0
+
+                ; SCORING CHANGE
+                mov si, offset easyFile ;for Easy
+                lea di, filename
+                call copy_filename
+                ; END OF SCORING CHANGE
+
                 call main_loop
+            
             med:
             cmp al, '2'
                 jnz hard 
                 mov difficulty, 1
+                
+                ; SCORING CHANGE
+                mov si, offset mediumFile ;for Medium
+                lea di, filename
+                call copy_filename
+                ; END OF SCORING CHANGE
+
                 call load_walls
                 call main_loop
+           
             hard:
             cmp al, '3'
                 jnz challenger
                 mov difficulty, 2
+                
+                ; SCORING CHANGE
+                mov si, offset hardFile ;for Hard
+                lea di, filename
+                call copy_filename
+                ; END OF SCORING CHANGE
+
+                call load_walls
+                call main_loop
+
+            challenger:
+            cmp al, '4'
+                jnz mm 
+                mov difficulty, 3
+                
+                ; SCORING CHANGE
+                mov si, offset challFile     ;for Challenger
+                lea di, filename
+                call copy_filename
+                ; END OF SCORING CHANGE
+
                 call load_walls
                 call main_loop
             challenger:
@@ -474,6 +611,94 @@
 
                 df_menu: jmp menu_page
         
+        lead_diff_page: ; new Leaderboard page
+            call cls
+            call menu_bg_draw
+
+            mov ax, @data
+            mov ds, ax
+            mov es, ax
+
+            ; Show difficulty prompt
+            mov dh, 7
+            mov dl, 10
+            mov bl, 0Ch
+            mov cx, strDiffSelec_l
+            lea bp, strDiffSelec
+            call str_out
+
+            ; EASY
+            mov dh, 10
+            mov dl, 14
+            mov bl, 0Eh
+            mov cx, strEasy_l
+            lea bp, strEasy
+            call str_out
+
+            ; MODERATE
+            mov dh, 12
+            mov cx, strModerate_l
+            lea bp, strModerate
+            call str_out
+
+            ; HARD
+            mov dh, 14
+            mov cx, strHard_l
+            lea bp, strHard
+            call str_out
+
+            ; CHALLENGER
+            mov dh, 16
+            mov cx, strChallenger_l
+            lea bp, strChallenger
+            call str_out
+
+            ; BACK
+            mov dh, 19
+            mov cx, strBack_l
+            lea bp, strBack
+            call str_out
+
+        lead_diff_input:
+            call resp
+            cmp al, '1'
+                jz lead_easy
+            cmp al, '2'
+                jz lead_med
+            cmp al, '3'
+                jz lead_hard
+            cmp al, '4'
+                jz lead_chall
+            cmp al, 'b'
+                jne lead_diff_input
+                jmp menu_page
+
+        lead_easy:
+            mov difficulty, 0
+            mov si, offset easyFile
+            jmp lead_set_file
+
+        lead_med:
+            mov difficulty, 1
+            mov si, offset mediumFile
+            jmp lead_set_file
+
+        lead_hard:
+            mov difficulty, 2
+            mov si, offset hardFile
+            jmp lead_set_file
+
+        lead_chall:
+            mov difficulty, 3
+            mov si, offset challFile
+
+        lead_set_file:
+            lea di, filename
+            call copy_filename
+            jmp lead_page
+
+    
+ 
     load_walls proc
         ;get random bit (0 or 1) using systime for map choice
         mov ax, @data
@@ -527,7 +752,7 @@
                 loop ldwall
         ret
     load_walls endp
-
+   
     game_over_page proc
         mov ax, @data
         mov es, ax
@@ -621,22 +846,22 @@
         go_exit: jmp exit
 
         go_save:
-        call cls
-        call menu_bg_draw
+            call cls
+            call menu_bg_draw
 
-        mov ax, @data
-        mov ds, ax
-        mov es, ax 
+            mov ax, @data
+            mov ds, ax
+            mov es, ax 
 
-        lea bp, strUname
-        mov cx, strUname_l
-        mov bl, 0Fh
-        mov dh, 8
-        mov dl, 12
-        call str_out
-        
-        mov cx, 3
-        mov bp, 0
+            lea bp, strUname
+            mov cx, strUname_l
+            mov bl, 0Fh
+            mov dh, 8
+            mov dl, 12
+            call str_out
+            
+            mov cx, 3
+            mov bp, 0
         underscore:
             mov ah, 2
             mov dh, 10
@@ -658,6 +883,16 @@
         lea si, uname 
         mov cx, 3
         mov bp, 0
+
+    flush_input: ; cleans the input stream.
+        mov ah, 01h
+        int 16h
+        jz flush_done
+        mov ah, 00h
+        int 16h
+        jmp flush_input
+    flush_done:
+    mov bp, 0
         get_uname:
             mov ah, 7
             int 21h
@@ -752,18 +987,25 @@
             lea si, iscore 
             mov byte ptr [si+1], al
             
-        ;open file  
+        ; open file DONT COMMENT THIS OUT, IT'S FOR WRITING THE SCORES   
         mov ax, 3d02h
         lea dx, filename
         int 21h
         jnc read_file
 
-        ; create and write to DATA.txt if it does not exist
-        mov ax, 3c00h
-        mov cx, 0
-        lea dx, filename
-        int 21h
+        ; create and write to [difficulty].txt if it does not exist
+        ;mov ax, 3c00h
+        ;mov cx, 0
+        ;lea dx, filename
+        ;int 21h
+        ;mov handle, ax ; added this as the old code included a small bug wherein it just doesnt store our handle.
         
+        ; clear scores buffer before writing (part of my fix for create and write just above this)
+        lea di, scores
+        mov cx, 301 ; old: mov cx, 1fh (am making sure it uses exactly 301 bytes)
+        mov al, 0
+        rep stosb
+
         read_file:
         mov handle, ax
         ;seek to start of file
@@ -810,7 +1052,7 @@
         inc ch
         mov byte ptr [si], ch
         
-        ;SORTING
+        ;SORTING (Jed Note - Seems to be a kind of bubble sort?)
         mov dh, ch
         ;ch = outer loop counter
         ;dh = inner loop counter
@@ -877,42 +1119,116 @@
         int 21h
         jmp menu_page
     game_over_page endp
+   
+    ; temporary position, change later if needed or remove this comment.
+    copy_filename proc ; subroutine added here for the Difficulty Selector.
+        copy_loop:
+            lodsb
+            stosb
+            cmp al, 0
+            jne copy_filename
+        ret
+    copy_filename endp
 
-    lead_page:
-        mov ax, @data
-        mov es, ax
-        call cls
+lead_page:
+    mov ax, @data
+    mov es, ax
+    call cls
 
-        ;write leaderboard prompt
-        mov dh, 6 ;row
-        mov dl, 14 ;column
-        mov bl, 0Ah ;color
-        mov cx, strLeadPage_l
-        lea bp, strLeadPage
+    ; Score Labeling I found, unsure of a cleaner way of doing this :<
+    ; -- Display current difficulty label --
+    cmp difficulty, 0
+    je show_easy
+    cmp difficulty, 1
+    je show_medium
+    cmp difficulty, 2
+    je show_hard
+    cmp difficulty, 3
+    je show_chall
+    cmp difficulty, 4
+    je show_surv
+
+    show_easy:
+        lea bp, easyLabel
+        jmp print_diff
+    show_medium:
+        lea bp, medLabel
+        jmp print_diff
+    show_hard:
+        lea bp, hardLabel
+        jmp print_diff
+    show_chall:
+        lea bp, challLabel
+    show_surv:
+        lea bp, survLabel
+
+    print_diff:
+        mov dh, 4      ; row above "LEADERBOARD"
+        mov dl, 14
+        mov cx, diffLabel_l
+        mov bl, 0Eh    ; yellow color
         call str_out
 
-        mov ax, @data
-        mov ds, ax
 
-        mov ax, 3d02h
-        lea dx, filename
-        int 21h
-        jnc read
+    ;write leaderboard prompt
+    mov dh, 6 ;row
+    mov dl, 14 ;column
+    mov bl, 0Ah ;color
+    mov cx, strLeadPage_l
+    lea bp, strLeadPage
+    call str_out
+    
+    mov ax, @data
+    mov ds, ax
 
-        ; create and write to DATA.txt if it does not exist
-        mov ax, 3c00h
-        mov cx, 0
-        lea dx, filename
-        int 21h 
+    ;mov ax, 3d02h
+    ;lea dx, filename
+    ;int 21h
+    ;jnc read
 
-        mov bx, handle
-        lea dx, scores
-        mov ax, 4000h
-        mov cx, 1
-        int 21h
-        jmp back_to_menu
+    ; OLD: create and write to DATA.txt if it does not exist (This is changed, the filename is heavily dependent on selected difficulty)
+    ; mov ax, 3c00h
+    ; mov cx, 0
+    ; lea dx, filename
+    ; int 21h 
+    ; Changed to become a procedure check_create_file and init_file, located after wall generation for .code
 
-        read:
+    ; Original
+    ;mov bx, handle
+    ;lea dx, scores
+    ;mov ax, 4000h
+    ;mov cx, 1
+    ;int 21h
+    ;jmp back_to_menu
+
+    lea di, scores
+    mov cx, 301
+    mov al, 0
+    rep stosb
+
+    ; Open the correct score file
+    mov ax, 3d02h       ;open for read/write
+    lea dx, filename    ;dx = pointer to selected filename
+    int 21h
+    ;jc back_to_menu    ;skip if error things, not working as of yet due to jump limits with it exceeding 0020h bytes
+    mov handle, ax      ;save handle
+
+    ; Seek to start
+    mov ax, 4200h
+    mov bx, handle
+    xor cx, cx
+    xor dx, dx
+    int 21h
+
+    ; Read scores
+    mov ah, 3fh
+    mov bx, handle
+    mov cx, 1fh
+    lea dx, scores
+    int 21h
+ 
+
+    read:
         mov handle, ax
         ;seek to start of file
         mov ax, 4200h
@@ -927,6 +1243,44 @@
         mov cx, 1fh
         lea dx, scores
         int 21h
+
+        ;jc read_fail         ;jump if error (carry flag set)
+        ;cmp ax, 0
+        ;je read_fail         ;jump if read 0 bytes
+
+        lea si, scores
+        mov ch, byte ptr [si]
+        cmp ch, 0
+        je back_to_menu
+        ;ch = number of records
+
+        inc si
+
+    ; THIS WORKED, HOWEVER IT RESULTED TO EVERY OTHER RECORD DISAPPEARING
+    ; read_fail: ; failsafe added due to almost unfixable garbage output from empty leaderboard file
+        ; make sure record count is set to 0
+       ;mov byte ptr [scores], 0
+       ;jmp back_to_menu
+    
+    iter_scores:
+        lea di, strbuf
+        mov cl, 04h
+        ldbuf:
+            mov dl, byte ptr [si]
+            mov byte ptr [di], dl
+            inc di
+            inc si
+            dec cl
+            jnz ldbuf
+
+
+        mov ax, @data
+        mov ds, ax
+
+        mov ax, 3d02h
+        lea dx, filename
+        int 21h
+        jnc read
 
         lea si, scores
         mov ch, byte ptr [si]
@@ -2351,7 +2705,7 @@
         je harddelay 
         cmp difficulty, 3
         je challengerdelay 
-        
+
         easydelay: ; 125000 microsec (1e848h)
             mov cx, 1
             mov dx, 0e848h
@@ -2360,12 +2714,15 @@
             mov cx, 1
             mov dx, 86a0h
             jmp calldelay
+
         harddelay: ; 75000 microsec (124f8h)
             mov cx, 1
             mov dx, 24f8h
+            
         challengerdelay: ; 10000 microsec (2710h)
             mov cx, 1
             mov dx, 2710h
+
         calldelay:
             call delay
 
@@ -2932,7 +3289,7 @@
     
     easy_map:
     	;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  
-        DB 0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh  ; 1
+        DB 0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh,0Fh  ; 1
         DB 0Fh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Fh	; 2
         DB 0Fh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Fh	; 3
         DB 0Fh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Fh	; 4
