@@ -1666,166 +1666,6 @@ lead_page:
         ret
     mech_page_6 endp
     
-    mech_page_8 proc
-        mov ax, @data
-        mov es, ax
-        call cls
-        call mech_print_page_defaults
-
-        ; write "8 - NEW DIFFICULTY ADDED!"
-        mov dh, 4 ;row
-        mov dl, 11 ;column
-        mov bl, 0Ch ;color
-        mov cx, strMechTitle8_l
-        lea bp, strMechTitle8
-        call str_out
-
-        ; write INTRODUCING TWO NEW STAGES:"
-        mov dh, 17 ;row
-        mov dl, 8 ;column
-        mov bl, 0Fh ;color
-        mov cx, strMechInstructions8_1_l
-        lea bp, strMechInstructions8_1
-        call str_out
-
-        ; write "WITH FASTER SPEED AND GIMMICKS"
-        mov dh, 18 ;row
-        mov dl, 5 ;column
-        mov bl, 0Dh ;color
-        mov cx, strMechInstructions8_2_l
-        lea bp, strMechInstructions8_2
-        call str_out
-
-        ; write "8 OF 8"
-        mov dh, 20 ;row
-        mov dl, 14 ;column
-        mov bl, 0Eh ;color
-        mov cx, strMechNavi8_l
-        lea bp, strMechNavi8
-        call str_out
-
-        ; write "CHALLENGER     SURVIVAL"
-        mov dh, 6
-        mov dl, 7
-        mov bl, 0Fh ; color
-        mov cx, strMechDiffLabels_2
-        lea bp, strMechDiffLabels2
-        call str_out
-
-        ; write time delays
-        mov dh, 15
-        mov dl, 6
-        mov bl, 03h ; color
-        mov cx, strMechDiffTimeDelays_2
-        lea bp, strMechDiffTimeDelays2
-        call str_out
-
-        ; easy
-        mov dx, 090Ah
-        call calculate_pos 
-        lea si, challenger_map
-        mov bh, 39
-        mov bl, 23
-        call draw_img
-
-        ; Reused Hard Map 1 for Survival Mode
-        mov dx, 1A08h
-        call calculate_pos        
-        lea si, hard_map_1
-        mov bh, 39
-        mov bl, 23
-        call draw_img
-
-        ; Reused Hard Map 2 for Survival Mode
-        mov dx, 1A0Bh
-        call calculate_pos        
-        lea si, hard_map_2
-        mov bh, 39
-        mov bl, 23
-        call draw_img
-
-        mov ch, 8
-        call mech_get_resp
-        ret
-    mech_page_8 endp
-
-    mech_page_9 proc
-        mov ax, @data
-        mov es, ax
-        call cls
-        call mech_print_page_defaults
-
-        ; write "9 - BEWARE!!!"
-        mov dh, 4 ;row
-        mov dl, 16 ;column
-        mov bl, 04h ;color
-        mov cx, strMechTitle9_l
-        lea bp, strMechTitle9
-        call str_out
-
-        ; write "DO NOT LET SNEK BE HARMED"
-        mov dh, 16 ;row
-        mov dl, 8 ;column
-        mov bl, 04h ;color
-        mov cx, strMechInstructions9_1_l
-        lea bp, strMechInstructions9_1
-        call str_out
-
-        ; write "BY THE FIREBALL AND EAGLE"
-        mov dh, 17 ;row
-        mov dl, 8 ;column
-        mov bl, 0Fh ;color
-        mov cx, strMechInstructions9_2_l
-        lea bp, strMechInstructions9_2
-        call str_out
-
-        ; write "OR ELSE IT ENDS THE GAME!"
-        mov dh, 18 ;row
-        mov dl, 10 ;column
-        mov bl, 0Fh ;color
-        mov cx, strMechInstructions9_3_l
-        lea bp, strMechInstructions9_3
-        call str_out
-
-        ; write "9 OF 9"
-        mov dh, 20 ;row
-        mov dl, 14 ;column
-        mov bl, 0Eh ;color
-        mov cx, strMechNavi9_l
-        lea bp, strMechNavi9
-        call str_out
-
-        ; draw eagle
-        mov dx, 0F09h
-        call calculate_pos 
-        lea si, eagle
-        mov bh, 8
-        mov bl, 8
-        call draw_img
-
-        ; draw top snake
-        mov dx, 1009h
-        mov cx, 10
-        call draw_snake_demo 
-
-        ; draw eagle
-        mov dx, 0F0Ah
-        call calculate_pos 
-        lea si, fireball
-        mov bh, 8
-        mov bl, 8
-        call draw_img
-
-        ; draw bottom snake
-        mov dx, 100Ah
-        mov cx, 10
-        call draw_snake_demo
-        
-        mov ch, 9
-        call mech_get_resp
-        ret
-    mech_page_9 endp
-
     mech_page_7 proc
         mov ax, @data
         mov es, ax
@@ -1916,6 +1756,159 @@ lead_page:
         call mech_get_resp
         ret
     mech_page_7 endp
+
+    mech_page_8 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "8 - NEW DIFFICULTY ADDED!"
+        mov dh, 4 ;row
+        mov dl, 11 ;column
+        mov bl, 0Ch ;color
+        mov cx, strMechTitle8_l
+        lea bp, strMechTitle8
+        call str_out
+
+        ; write INTRODUCING TWO NEW STAGES:"
+        mov dh, 17 ;row
+        mov dl, 8 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions8_1_l
+        lea bp, strMechInstructions8_1
+        call str_out
+
+        ; write "WITH FASTER SPEED AND GIMMICKS"
+        mov dh, 18 ;row
+        mov dl, 5 ;column
+        mov bl, 0Dh ;color
+        mov cx, strMechInstructions8_2_l
+        lea bp, strMechInstructions8_2
+        call str_out
+
+        ; write "8 OF 8"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi8_l
+        lea bp, strMechNavi8
+        call str_out
+
+        ; write "CHALLENGER     SURVIVAL"
+        mov dh, 6
+        mov dl, 7
+        mov bl, 0Fh ; color
+        mov cx, strMechDiffLabels_2
+        lea bp, strMechDiffLabels2
+        call str_out
+
+        ; write time delays
+        mov dh, 15
+        mov dl, 6
+        mov bl, 03h ; color
+        mov cx, strMechDiffTimeDelays_2
+        lea bp, strMechDiffTimeDelays2
+        call str_out
+
+        ; challenger
+        mov dx, 090Ah
+        call calculate_pos 
+        lea si, challenger_map
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        ; Reused Challenger Map for Survival Mode
+        mov dx, 1A0Ah
+        ;mov dx, 1A08h
+        call calculate_pos        
+        lea si, challenger_map
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        mov ch, 8
+        call mech_get_resp
+        ret
+    mech_page_8 endp
+
+    mech_page_9 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "9 - BEWARE!!!"
+        mov dh, 4 ;row
+        mov dl, 16 ;column
+        mov bl, 04h ;color
+        mov cx, strMechTitle9_l
+        lea bp, strMechTitle9
+        call str_out
+
+        ; write "DO NOT LET SNEK BE HARMED"
+        mov dh, 16 ;row
+        mov dl, 8 ;column
+        mov bl, 04h ;color
+        mov cx, strMechInstructions9_1_l
+        lea bp, strMechInstructions9_1
+        call str_out
+
+        ; write "BY THE FIREBALL AND EAGLE"
+        mov dh, 17 ;row
+        mov dl, 8 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions9_2_l
+        lea bp, strMechInstructions9_2
+        call str_out
+
+        ; write "OR ELSE IT ENDS THE GAME!"
+        mov dh, 18 ;row
+        mov dl, 10 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions9_3_l
+        lea bp, strMechInstructions9_3
+        call str_out
+
+        ; write "9 OF 9"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi9_l
+        lea bp, strMechNavi9
+        call str_out
+
+        ; draw eagle
+        mov dx, 0F09h
+        call calculate_pos 
+        lea si, eagle
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw top snake
+        mov dx, 1009h
+        mov cx, 10
+        call draw_snake_demo 
+
+        ; draw eagle
+        mov dx, 0F0Ah
+        call calculate_pos 
+        lea si, fireball
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw bottom snake
+        mov dx, 100Ah
+        mov cx, 10
+        call draw_snake_demo
+        
+        mov ch, 9
+        call mech_get_resp
+        ret
+    mech_page_9 endp
 
     ; gets response per page display
     mech_get_resp proc
