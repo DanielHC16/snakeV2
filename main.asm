@@ -231,7 +231,7 @@
     strMechDiffTimeDelays_l equ $ - strMechDiffTimeDelays
 
     ;[7]-mechanics     VIEW LEADERBOARDS
-    strMechNavi7 db "<  7 OF 9   ",13,10
+    strMechNavi7 db "<  7 OF 9  >",13,10
     strMechNavi7_l equ $ - strMechNavi7
 
     strMechTitle7 db " VIEW LEADERBOARDS",13,10
@@ -281,7 +281,7 @@
     strMechDiffTimeDelays_2 equ $ - strMechDiffTimeDelays2
 
     ;[9]-mechanics     BEWARE!!!
-    strMechNavi9 db "<  9 OF 9  >",13,10
+    strMechNavi9 db "<  9 OF 9",13,10
     strMechNavi9_l equ $ - strMechNavi9
 
     strMechTitle9 db "BEWARE!!!",13,10
