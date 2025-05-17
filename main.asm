@@ -680,7 +680,7 @@
             mov es, ax
 
             ; Show difficulty prompt
-            mov dh, 7
+            mov dh, 4
             mov dl, 10
             mov bl, 0Ch
             mov cx, strDiffSelec_l
@@ -688,7 +688,7 @@
             call str_out
 
             ; EASY
-            mov dh, 10
+            mov dh, 7
             mov dl, 14
             mov bl, 0Eh
             mov cx, strEasy_l
@@ -696,25 +696,31 @@
             call str_out
 
             ; MODERATE
-            mov dh, 12
+            mov dh, 9
             mov cx, strModerate_l
             lea bp, strModerate
             call str_out
 
             ; HARD
-            mov dh, 14
+            mov dh, 11
             mov cx, strHard_l
             lea bp, strHard
             call str_out
 
             ; CHALLENGER
-            mov dh, 16
+            mov dh, 13
             mov cx, strChallenger_l
             lea bp, strChallenger
             call str_out
 
+            ; SURVIVAL
+            mov dh, 15
+            mov cx, strSurvival_l
+            lea bp, strSurvival
+            call str_out
+
             ; BACK
-            mov dh, 19
+            mov dh, 18
             mov cx, strBack_l
             lea bp, strBack
             call str_out
@@ -729,6 +735,8 @@
                 jz lead_hard
             cmp al, '4'
                 jz lead_chall
+            cmp al, '5'
+                jz lead_surv
             cmp al, 'b'
                 jne lead_diff_input
                 jmp menu_page
@@ -751,6 +759,11 @@
         lead_chall:
             mov difficulty, 3
             mov si, offset challFile
+            jmp lead_set_file
+
+        lead_surv:
+            mov difficulty, 4
+            mov si, offset survFile
 
         lead_set_file:
             lea di, filename
