@@ -283,11 +283,15 @@
 
     ; SCORING PAGE Labels
     easyLabel     db 'EASY-MODE',13,10
+    easyLabel_l   equ $ - easyLabel
     medLabel      db 'MEDIUM-MODE',13,10
+    medLabel_l    equ $ - medLabel
     hardLabel     db 'HARD-MODE',13,10
+    hardLabel_l   equ $ - hardLabel
     challLabel    db 'CHALL-MODE',13,10
-    survLabel     db 'SURVI-MODE',13,10
-    diffLabel_l   equ 12 ; all labels are 12 chars including newline
+    challLabel_l  equ $ - challLabel
+    survLabel     db 'SURV-MODE',13,10
+    survLabel_l   equ $ - survLabel
 
 
     handle dw ?
@@ -613,6 +617,7 @@
 
                 call load_walls
                 call main_loop
+
             ;---- tim ----;
             survival:
             cmp al, '5'
@@ -678,8 +683,15 @@
             lea bp, strChallenger
             call str_out
 
+
+            ; SURVIVAL
+            mov dh, 18
+            mov cx, strSurvival_l
+            lea bp, strSurvival
+            call str_out
+
             ; BACK
-            mov dh, 19
+            mov dh, 21
             mov cx, strBack_l
             lea bp, strBack
             call str_out
@@ -694,6 +706,8 @@
                 jz lead_hard
             cmp al, '4'
                 jz lead_chall
+            cmp al, '5'
+                jz lead_surv
             cmp al, 'b'
                 jne lead_diff_input
                 jmp menu_page
@@ -714,6 +728,10 @@
             jmp lead_set_file
 
         lead_chall:
+            mov difficulty, 3
+            mov si, offset challFile
+        
+        lead_surv:
             mov difficulty, 3
             mov si, offset challFile
 
@@ -1175,22 +1193,27 @@ lead_page:
 
     show_easy:
         lea bp, easyLabel
+        mov cx, easyLabel_l         ; param for str_out
         jmp print_diff
     show_medium:
         lea bp, medLabel
+        mov cx, medLabel_l
         jmp print_diff
     show_hard:
         lea bp, hardLabel
+        mov cx, hardLabel_l
         jmp print_diff
     show_chall:
         lea bp, challLabel
+        mov cx, challLabel_l
+        jmp print_diff
     show_surv:
         lea bp, survLabel
+        mov cx, survLabel_l
 
     print_diff:
         mov dh, 4      ; row above "LEADERBOARD"
         mov dl, 14
-        mov cx, diffLabel_l
         mov bl, 0Eh    ; yellow color
         call str_out
 
@@ -2188,10 +2211,10 @@ lead_page:
             call draw
             call move
             call cls
-            ;---- tim ----;
+            
             cmp difficulty, 4 
             je do_survival
-            ;---- tim ----;
+            
             jmp game_loop
             do_paused:
                 mov dh, 12
@@ -2210,6 +2233,7 @@ lead_page:
         ; should never reach this
             mov ah, 4ch
             int 21h
+
     main_loop endp
     ;---- tim ----;
     move_fireball proc
@@ -2907,8 +2931,7 @@ lead_page:
             mov cx, 0fh
             mov dx, 4240h 
             call delay 
-            call game_over_page
-            ret
+            jmp game_over_page
         collision:
             mov ax, @data
             mov ds, ax 
