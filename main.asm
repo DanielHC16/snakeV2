@@ -140,7 +140,7 @@
     strMechGoBack_l equ $ - strMechGoBack
 
     ;[1]-mechanics     HOW TO MOVE?
-    strMechNavi1 db "   1 OF 7  >",13,10
+    strMechNavi1 db "   1 OF 9  >",13,10
     strMechNavi1_l equ $ - strMechNavi1
 
     strMechTitle1 db "HOW TO MOVE?",13,10
@@ -150,7 +150,7 @@
     strMechInstructions1_l equ $ - strMechInstructions1
 
     ;[2]-mechanics     HOW TO STAY ALIVE?
-    strMechNavi2 db "<  2 OF 7  >",13,10
+    strMechNavi2 db "<  2 OF 9  >",13,10
     strMechNavi2_l equ $ - strMechNavi2
 
     strMechTitle2 db "HOW TO STAY ALIVE?",13,10
@@ -164,7 +164,7 @@
 
 
     ;[3]-mechanics     WHAT'S THE GOAL?
-    strMechNavi3 db "<  3 OF 7  >",13,10
+    strMechNavi3 db "<  3 OF 9  >",13,10
     strMechNavi3_l equ $ - strMechNavi3
 
     strMechTitle3 db "WHAT'S THE GOAL?",13,10
@@ -180,7 +180,7 @@
     strMechInstructions3_3_l equ $ - strMechInstructions3_3
 
     ;[4]-mechanics     BEWARE!!!
-    strMechNavi4 db "<  4 OF 7  >",13,10
+    strMechNavi4 db "<  4 OF 9  >",13,10
     strMechNavi4_l equ $ - strMechNavi4
 
     strMechTitle4 db "BEWARE!!!",13,10
@@ -196,7 +196,7 @@
     strMechInstructions4_3_l equ $ - strMechInstructions4_3
 
     ;[5]-mechanics     A SURPRISE!
-    strMechNavi5 db "<  5 OF 7  >",13,10
+    strMechNavi5 db "<  5 OF 9  >",13,10
     strMechNavi5_l equ $ - strMechNavi5
 
     strMechTitle5 db "A SURPRISE!",13,10
@@ -212,7 +212,7 @@
     strMechInstructions5_3_l equ $ - strMechInstructions5_3
 
     ;[6]-mechanics     CHOOSE DIFFICULTY
-    strMechNavi6 db "<  6 OF 7  >",13,10
+    strMechNavi6 db "<  6 OF 9  >",13,10
     strMechNavi6_l equ $ - strMechNavi6
 
     strMechTitle6 db "CHOOSE DIFFICULTY!",13,10
@@ -231,7 +231,7 @@
     strMechDiffTimeDelays_l equ $ - strMechDiffTimeDelays
 
     ;[7]-mechanics     VIEW LEADERBOARDS
-    strMechNavi7 db "<  7 OF 7   ",13,10
+    strMechNavi7 db "<  7 OF 9   ",13,10
     strMechNavi7_l equ $ - strMechNavi7
 
     strMechTitle7 db " VIEW LEADERBOARDS",13,10
@@ -260,6 +260,41 @@
 
     strMechLeaderboardsPlyr5 db "MCH 095",13,10
     strMechLeaderboardsPlyr5_l equ $ - strMechLeaderboardsPlyr5
+
+    ;[8]-mechanics     NEW STAGES DIFFICULTY
+    strMechNavi8 db "<  8 OF 9  >",13,10
+    strMechNavi8_l equ $ - strMechNavi8
+
+    strMechTitle8 db "NEW DIFFICULTY ADDED!",13,10
+    strMechTitle8_l equ $ - strMechTitle8
+
+    strMechInstructions8_1 db "INTRODUCING TWO NEW STAGES",13,10
+    strMechInstructions8_1_l equ $ - strMechInstructions8_1
+
+    strMechInstructions8_2 db "WITH FASTER SPEEDS AND GIMMICKS",13,10
+    strMechInstructions8_2_l equ $ - strMechInstructions8_2
+
+    strMechDiffLabels2 db "CHALLENGER       SURVIVAL",13,10
+    strMechDiffLabels_2 equ $ - strMechDiffLabels2
+
+    strMechDiffTimeDelays2 db "  0.01 SEC        0.001 SEC ",13,10
+    strMechDiffTimeDelays_2 equ $ - strMechDiffTimeDelays2
+
+    ;[9]-mechanics     BEWARE!!!
+    strMechNavi9 db "<  9 OF 9  >",13,10
+    strMechNavi9_l equ $ - strMechNavi9
+
+    strMechTitle9 db "BEWARE!!!",13,10
+    strMechTitle9_l equ $ - strMechTitle9
+
+    strMechInstructions9_1 db "DO NOT LET SNEK BE HARMED",13,10
+    strMechInstructions9_1_l equ $ - strMechInstructions9_1
+
+    strMechInstructions9_2 db "BY THE FIREBALL AND EAGLE",13,10
+    strMechInstructions9_2_l equ $ - strMechInstructions9_2
+
+    strMechInstructions9_3 db "IT WILL END THE GAME!",13,10
+    strMechInstructions9_3_l equ $ - strMechInstructions9_3
 
     strUname db "Enter your name:",13,10
     strUname_l equ $-strUname
@@ -1452,6 +1487,10 @@
             je goto_mech_page_6
         cmp ch, 7
             je goto_mech_page_7
+        cmp ch, 8
+            je goto_mech_page_8
+        cmp ch, 9
+            je goto_mech_page_9
 
         goto_mech_page_1:
             call mech_page_1
@@ -1479,6 +1518,15 @@
         
         goto_mech_page_7:
             call mech_page_7
+            jmp skip1
+
+        goto_mech_page_8:
+            call mech_page_8
+            jmp skip1
+
+        goto_mech_page_9:
+            call mech_page_9
+            jmp skip1
 
         skip1: ret
     navigate_mech_page endp
@@ -2046,7 +2094,7 @@
         call mech_get_resp
         ret
     mech_page_6 endp
-
+    
     mech_page_7 proc
         mov ax, @data
         mov es, ax
@@ -2138,6 +2186,159 @@
         ret
     mech_page_7 endp
 
+    mech_page_8 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "8 - NEW DIFFICULTY ADDED!"
+        mov dh, 4 ;row
+        mov dl, 11 ;column
+        mov bl, 0Ch ;color
+        mov cx, strMechTitle8_l
+        lea bp, strMechTitle8
+        call str_out
+
+        ; write INTRODUCING TWO NEW STAGES:"
+        mov dh, 17 ;row
+        mov dl, 8 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions8_1_l
+        lea bp, strMechInstructions8_1
+        call str_out
+
+        ; write "WITH FASTER SPEED AND GIMMICKS"
+        mov dh, 18 ;row
+        mov dl, 5 ;column
+        mov bl, 0Dh ;color
+        mov cx, strMechInstructions8_2_l
+        lea bp, strMechInstructions8_2
+        call str_out
+
+        ; write "8 OF 8"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi8_l
+        lea bp, strMechNavi8
+        call str_out
+
+        ; write "CHALLENGER     SURVIVAL"
+        mov dh, 6
+        mov dl, 7
+        mov bl, 0Fh ; color
+        mov cx, strMechDiffLabels_2
+        lea bp, strMechDiffLabels2
+        call str_out
+
+        ; write time delays
+        mov dh, 15
+        mov dl, 6
+        mov bl, 03h ; color
+        mov cx, strMechDiffTimeDelays_2
+        lea bp, strMechDiffTimeDelays2
+        call str_out
+
+        ; challenger
+        mov dx, 090Ah
+        call calculate_pos 
+        lea si, challenger_map
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        ; Reused Challenger Map for Survival Mode
+        mov dx, 1A0Ah
+        ;mov dx, 1A08h
+        call calculate_pos        
+        lea si, challenger_map
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        mov ch, 8
+        call mech_get_resp
+        ret
+    mech_page_8 endp
+
+    mech_page_9 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "9 - BEWARE!!!"
+        mov dh, 4 ;row
+        mov dl, 16 ;column
+        mov bl, 04h ;color
+        mov cx, strMechTitle9_l
+        lea bp, strMechTitle9
+        call str_out
+
+        ; write "DO NOT LET SNEK BE HARMED"
+        mov dh, 16 ;row
+        mov dl, 8 ;column
+        mov bl, 04h ;color
+        mov cx, strMechInstructions9_1_l
+        lea bp, strMechInstructions9_1
+        call str_out
+
+        ; write "BY THE FIREBALL AND EAGLE"
+        mov dh, 17 ;row
+        mov dl, 8 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions9_2_l
+        lea bp, strMechInstructions9_2
+        call str_out
+
+        ; write "OR ELSE IT ENDS THE GAME!"
+        mov dh, 18 ;row
+        mov dl, 10 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions9_3_l
+        lea bp, strMechInstructions9_3
+        call str_out
+
+        ; write "9 OF 9"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi9_l
+        lea bp, strMechNavi9
+        call str_out
+
+        ; draw eagle
+        mov dx, 0F09h
+        call calculate_pos 
+        lea si, eagle
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw top snake
+        mov dx, 1009h
+        mov cx, 10
+        call draw_snake_demo 
+
+        ; draw eagle
+        mov dx, 0F0Ah
+        call calculate_pos 
+        lea si, fireball
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw bottom snake
+        mov dx, 100Ah
+        mov cx, 10
+        call draw_snake_demo
+        
+        mov ch, 9
+        call mech_get_resp
+        ret
+    mech_page_9 endp
+
     ; gets response per page display
     mech_get_resp proc
         call resp
@@ -2158,7 +2359,7 @@
         
         ; do not increment if ch = 7
         mech_move_right:
-            cmp ch, 7
+            cmp ch, 9
                 jne mech_move_right_inc
                 je skip2
                
@@ -3278,48 +3479,49 @@
     ; bitmaps
     snake_head_up: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
-        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
+        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h  
+        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     ;00h - black
+        DB 00h,0Ah,0Eh,0Ah,0Ah,0Eh,0Ah,00h     ;0Ah - Light Green
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;02h - Green
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     ;0Ch - Light Red
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     ;0Eh - Yellow
+        DB 00h,00h,08h,0Ah,0Ah,08h,00h,00h     ;08h - dark gray
     snake_head_down: 
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h    
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,08h,0Ah,0Ah,08h,0Ah,00h    
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     
+        DB 00h,08h,0Ah,0Ah,0Ah,0Ah,08h,00h     
         DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
+        DB 00h,0Ah,0Eh,0Ah,0Ah,0Eh,0Ah,00h     
         DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
         DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_left: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
+        DB 00h,00h,00h,0Ah,0Ah,08h,00h,0Ah     ;00h- black
+        DB 00h,00h,0Ah,0Eh,0Ah,0Ah,0Ah,08h     ;0Ah - Light Green
+        DB 00h,0Ah,0Ah,0Ah,0Ah,08h,0Ah,0Ah     ;02h - Green
+        DB 0Ch,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,08h     ;0Ch - Light Red
+        DB 00h,0Ah,0Ah,0Ah,0Ah,08h,0Ah,0Ah     ;0Eh - Yellow
+        DB 00h,00h,0Ah,0Eh,0Ah,0Ah,0Ah,08h     ;08h - dark gray
+        DB 00h,00h,00h,0Ah,0Ah,08h,00h,0Ah     ;Note: it's 9x8 for some reason
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_right: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
+        DB 0Ah,00h,08h,0Ah,0Ah,0Ah,00h,00h     
+        DB 08h,0Ah,0Ah,0Ah,0Eh,0Ah,00h,00h     
+        DB 0Ah,0Ah,08h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 0Ah,0Ah,08h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 08h,0Ah,0Ah,0Ah,0Eh,0Ah,00h,00h     
+        DB 0Ah,00h,08h,0Ah,0Ah,0Ah,00h,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_body:
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,0Eh,0Ah,0Ah,08h,0Ah,00h     
+        DB 00h,0Eh,0Ah,08h,0Ah,0Ah,08h,00h     
+        DB 00h,0Ah,08h,0Eh,0Ah,0Ah,0Ah,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Eh,08h,0Ah,00h     
+        DB 00h,08h,0Ah,0Ah,08h,0Ah,0Eh,00h     
+        DB 00h,0Ah,08h,0Ah,0Ah,0Eh,0Ah,00h     
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
     food_map:
         DB 00h,00h,00h,0Ah,02h,00h,00h,00h  
@@ -3611,6 +3813,32 @@
         DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 21
         DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 22
         DB 0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch ; 23
+
+    challenger_map:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39
+        DB 0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh  ; 1
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 2
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 3
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 4
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 5
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 6 
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 7
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 8
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 9 
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 10
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 11
+        DB 0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh  ; 12
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 13
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 14
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 15
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 16
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 17
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 18
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 19
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 20
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 21
+        DB 0Dh,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Dh,00h,00h,00h,00h,00h,0Dh  ; 22
+        DB 0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh,0Dh  ; 23
 
     w_key:
         ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
