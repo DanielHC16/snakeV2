@@ -16,52 +16,17 @@
 <p align="center">
 
 
-https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/2327e71b-0a6b-46c5-b1b4-c3b276041605
 
 
-  <ul align="center">
-    <li>
-      <h2>Menu</h2>
-      <img style="width:500px" src="https://i.imgur.com/zR5O0Qo.png" alt="menu">
-    </li>
-    <li>
-      <h2>Leaderboard</h2>
-      <img style="width:500px" src="https://i.imgur.com/EPGcotb.png" alt="leaderboard">
-    </li>
-    <li>
-      <h2>Difficulty Selection</h2>
-      <img style="width:500px" src="https://i.imgur.com/ZZ8jddG.png" alt="diff">
-    </li>
-    <li>
-      <h2>Easy</h2>
-      <img style="width:500px" src="https://i.imgur.com/2UW7pIZ.png" alt="easy">
-    </li>
-    <li>
-      <h2>Medium</h2>
-      <img style="width:500px" src="https://i.imgur.com/CmAKk90.png" alt="med0">
-      <img style="width:500px" src="https://i.imgur.com/gdf158P.png" alt="med1">
-    </li>
-    <li>
-      <h2>Hard</h2>
-      <img style="width:500px" src="https://i.imgur.com/R1Wscyw.png" alt="hard0">
-      <img style="width:500px" src="https://i.imgur.com/vl52k5p.png" alt="hard1">
-    </li>
-    <li>
-      <h2>Mechanics</h2>
-      <img style="width:500px" src="https://i.imgur.com/ulHmGM2.png" alt="mech1">
-      <img style="width:500px" src="https://i.imgur.com/ao8f54c.png" alt="mech2">
-      <img style="width:500px" src="https://i.imgur.com/OalANPO.png" alt="mech3">
-      <img style="width:500px" src="https://i.imgur.com/Od9Ju0o.png" alt="mech4">
-      <img style="width:500px" src="https://i.imgur.com/VZvvem1.png" alt="mech5">
-      <img style="width:500px" src="https://i.imgur.com/Su6altu.png" alt="mech6">
-      <img style="width:500px" src="https://i.imgur.com/de2egJ2.png" alt="mech7">
-    </li>
-    <li>
-      <h2>Game Over</h2>
-      <img style="width:500px" src="https://i.imgur.com/cjk0lLy.png" alt="gameover">
-    </li>
-  </ul>
-</p>
+https://github.com/user-attachments/assets/1c3787c0-7a0c-43b7-abe6-d46af13049ec
+
+
+
+![menu](https://github.com/user-attachments/assets/05785b18-1801-4736-b2c4-476bf621d103)
+![lboard](https://github.com/user-attachments/assets/d10e9ef4-a6ad-44a2-98a9-d1d82be7d48e)
+![difficult](https://github.com/user-attachments/assets/a7adb516-3f1b-491e-a84a-100519c0e418)
+
+
 <h2>Quickstart Guide</h2>
 
 **A. Requirements** - Ensure that the following are installed before proceeding to the next steps:
